@@ -81,7 +81,7 @@ const GuardianJobsPage: NextPage<Props> = ({ jobs: initialJobs }) => {
         {filteredJobs.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <div className="text-5xl mb-4">📝</div>
+              <div className="text-5xl mb-4">[N]</div>
               <p className="text-lg text-muted-foreground mb-4">
                 {filter === 'all'
                   ? '아직 등록한 구인글이 없습니다.'
@@ -132,9 +132,9 @@ function JobCard({ job }: { job: JobWithApplications }) {
               </div>
 
               <div className="flex flex-wrap gap-4 text-base text-muted-foreground">
-                <span>📍 {job.location}</span>
-                <span>💰 {formatCurrency(job.hourly_rate)}/시간</span>
-                <span>📅 {new Date(job.start_date).toLocaleDateString('ko-KR')}</span>
+                <span>[L] {job.location}</span>
+                <span>[M] {formatCurrency(job.hourly_rate)}/시간</span>
+                <span> {new Date(job.start_date).toLocaleDateString('ko-KR')}</span>
               </div>
             </div>
 

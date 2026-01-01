@@ -28,9 +28,8 @@ const Home: NextPage = () => {
               <Button
                 variant="guardian"
                 size="lg"
-                className="w-full sm:w-auto gap-3"
+                className="w-full sm:w-auto"
               >
-                <span className="text-2xl">👨‍👩‍👧</span>
                 보호자로 시작하기
               </Button>
             </Link>
@@ -38,9 +37,8 @@ const Home: NextPage = () => {
               <Button
                 variant="caregiver"
                 size="lg"
-                className="w-full sm:w-auto gap-3"
+                className="w-full sm:w-auto"
               >
-                <span className="text-2xl">💪</span>
                 간병인으로 시작하기
               </Button>
             </Link>
@@ -56,17 +54,17 @@ const Home: NextPage = () => {
 
         <div className="grid md:grid-cols-3 gap-8">
           <FeatureCard
-            icon="✅"
+            icon="[v]"
             title="검증된 간병인"
             description="자격증과 경력이 검증된 전문 간병인만 활동합니다."
           />
           <FeatureCard
-            icon="💬"
+            icon="[...]"
             title="실시간 채팅"
             description="간병인과 보호자가 직접 소통하며 상세히 상담할 수 있습니다."
           />
           <FeatureCard
-            icon="⭐"
+            icon="[*]"
             title="솔직한 리뷰"
             description="실제 이용자의 솔직한 후기로 신뢰할 수 있습니다."
           />
@@ -113,7 +111,7 @@ function FeatureCard({
 }) {
   return (
     <div className="bg-card rounded-lg p-8 text-center shadow-sm border">
-      <div className="text-5xl mb-4">{icon}</div>
+      <div className="text-3xl font-mono text-primary mb-4">{icon}</div>
       <h3 className="text-lg font-bold mb-3">{title}</h3>
       <p className="text-base text-muted-foreground">{description}</p>
     </div>

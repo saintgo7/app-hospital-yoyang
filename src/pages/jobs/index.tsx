@@ -87,7 +87,7 @@ const JobsPage: NextPage<Props> = ({ jobs: initialJobs, locations }) => {
         {/* 구인글 목록 */}
         {filteredJobs.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-5xl mb-4">🔍</div>
+            <div className="text-5xl mb-4"></div>
             <p className="text-lg text-muted-foreground">
               조건에 맞는 구인글이 없습니다.
             </p>
@@ -129,10 +129,10 @@ function JobCard({
               </p>
 
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <span>📍 {job.location}</span>
-                <span>🏥 {job.care_type}</span>
-                {patientInfo?.age && <span>👤 {patientInfo.age}세</span>}
-                <span>📅 {new Date(job.start_date).toLocaleDateString('ko-KR')}</span>
+                <span>[L] {job.location}</span>
+                <span> {job.care_type}</span>
+                {patientInfo?.age && <span>[U] {patientInfo.age}세</span>}
+                <span> {new Date(job.start_date).toLocaleDateString('ko-KR')}</span>
               </div>
             </div>
 

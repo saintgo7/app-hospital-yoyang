@@ -244,7 +244,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {acceptedApplications.length > 0 && (
                       <div>
                         <h4 className="text-base font-bold mb-4 flex items-center gap-2">
-                          ✅ 수락됨 ({acceptedApplications.length}명)
+                          [v] 수락됨 ({acceptedApplications.length}명)
                         </h4>
                         <div className="space-y-4">
                           {acceptedApplications.map((app) => (
@@ -258,7 +258,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {rejectedApplications.length > 0 && (
                       <div>
                         <h4 className="text-base font-bold mb-4 flex items-center gap-2 text-muted-foreground">
-                          ❌ 거절됨 ({rejectedApplications.length}명)
+                          X 거절됨 ({rejectedApplications.length}명)
                         </h4>
                         <div className="space-y-4 opacity-60">
                           {rejectedApplications.map((app) => (
@@ -326,7 +326,7 @@ function ApplicantCard({
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-2">
             {profile?.experience_years && <span>경력 {profile.experience_years}년</span>}
             {profile?.hourly_rate && <span>희망 {formatCurrency(profile.hourly_rate)}/시간</span>}
-            {profile?.location && <span>📍 {profile.location}</span>}
+            {profile?.location && <span>[L] {profile.location}</span>}
           </div>
 
           {profile?.certifications && profile.certifications.length > 0 && (

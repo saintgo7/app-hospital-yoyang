@@ -96,19 +96,19 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
 
             <div className="grid grid-cols-2 gap-4 text-base">
               <div className="flex items-center gap-2">
-                <span className="text-xl">📍</span>
+                <span className="text-xl">[L]</span>
                 <span>{job.location}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl">🏥</span>
+                <span className="text-xl"></span>
                 <span>{job.care_type}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl">📅</span>
+                <span className="text-xl"></span>
                 <span>{formatDate(job.start_date)} 시작</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl">💰</span>
+                <span className="text-xl">[M]</span>
                 <span className="font-bold text-primary">
                   {formatCurrency(job.hourly_rate)}/시간
                 </span>
@@ -125,21 +125,21 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-2xl mb-1">👤</p>
+                <p className="text-2xl mb-1">[U]</p>
                 <p className="text-sm text-muted-foreground">나이</p>
                 <p className="text-lg font-bold">
                   {patientInfo?.age || '-'}세
                 </p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-2xl mb-1">{patientInfo?.gender === '여성' ? '👩' : '👨'}</p>
+                <p className="text-2xl mb-1">{patientInfo?.gender === '여성' ? '' : ''}</p>
                 <p className="text-sm text-muted-foreground">성별</p>
                 <p className="text-lg font-bold">
                   {patientInfo?.gender || '-'}
                 </p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-2xl mb-1">🏥</p>
+                <p className="text-2xl mb-1"></p>
                 <p className="text-sm text-muted-foreground">상태</p>
                 <p className="text-lg font-bold">
                   {patientInfo?.condition || '-'}
@@ -173,7 +173,7 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
 
               {hasApplied ? (
                 <div className="text-center py-6">
-                  <div className="text-4xl mb-4">✅</div>
+                  <div className="text-4xl mb-4">[v]</div>
                   <p className="text-lg font-bold mb-2">
                     지원이 완료되었습니다!
                   </p>

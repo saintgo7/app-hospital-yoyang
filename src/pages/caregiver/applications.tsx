@@ -133,8 +133,8 @@ function ApplicationCard({
 }) {
   const statusConfig = {
     pending: { label: '검토 중', variant: 'warning' as const, icon: '⏳' },
-    accepted: { label: '수락됨', variant: 'success' as const, icon: '✅' },
-    rejected: { label: '거절됨', variant: 'destructive' as const, icon: '❌' },
+    accepted: { label: '수락됨', variant: 'success' as const, icon: '[v]' },
+    rejected: { label: '거절됨', variant: 'destructive' as const, icon: 'X' },
   }
 
   const { label, variant, icon } = statusConfig[application.status]
@@ -157,9 +157,9 @@ function ApplicationCard({
             </div>
 
             <div className="space-y-2 text-base text-muted-foreground">
-              <p>📍 {job.location}</p>
-              <p>💰 {formatCurrency(job.hourly_rate)}/시간</p>
-              <p>👤 {job.guardian.name} 보호자님</p>
+              <p>[L] {job.location}</p>
+              <p>[M] {formatCurrency(job.hourly_rate)}/시간</p>
+              <p>[U] {job.guardian.name} 보호자님</p>
               <p className="text-sm">지원일: {getTimeAgo(application.created_at)}</p>
             </div>
 

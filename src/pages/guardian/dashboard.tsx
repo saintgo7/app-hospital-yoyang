@@ -47,12 +47,12 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
           <StatCard
             title="등록한 구인글"
             value={stats.totalJobs}
-            icon="📝"
+            icon="[N]"
           />
           <StatCard
             title="모집 중"
             value={stats.openJobs}
-            icon="🔔"
+            icon=""
             variant="caregiver"
           />
           <StatCard
@@ -65,10 +65,10 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
 
         {/* 빠른 메뉴 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <QuickMenu href="/guardian/jobs/new" icon="✏️" label="구인글 작성" primary />
-          <QuickMenu href="/guardian/jobs" icon="📋" label="내 구인글" />
-          <QuickMenu href="/caregivers" icon="🔍" label="간병인 찾기" />
-          <QuickMenu href="/chat" icon="💬" label="채팅" />
+          <QuickMenu href="/guardian/jobs/new" icon="" label="구인글 작성" primary />
+          <QuickMenu href="/guardian/jobs" icon="[#]" label="내 구인글" />
+          <QuickMenu href="/caregivers" icon="" label="간병인 찾기" />
+          <QuickMenu href="/chat" icon="[...]" label="채팅" />
         </div>
 
         {/* 내 구인글 */}
@@ -84,7 +84,7 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
           <CardContent>
             {jobs.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-4xl mb-4">📝</div>
+                <div className="text-4xl mb-4">[N]</div>
                 <p className="text-base text-muted-foreground mb-4">
                   아직 등록한 구인글이 없습니다.
                 </p>

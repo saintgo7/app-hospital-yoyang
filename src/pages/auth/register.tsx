@@ -45,13 +45,13 @@ const RegisterPage: NextPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setSelectedRole('guardian')}
-                  className={`p-6 rounded-2xl border-2 transition-all ${
+                  className={`p-6 rounded-lg border-2 transition-all ${
                     selectedRole === 'guardian'
                       ? 'border-guardian bg-guardian/10'
                       : 'border-muted hover:border-guardian/50'
                   }`}
                 >
-                  <div className="text-4xl mb-3">👨‍👩‍👧</div>
+                  <div className="text-2xl font-mono text-guardian mb-3">[G]</div>
                   <div className="text-lg font-bold">보호자</div>
                   <p className="text-sm text-muted-foreground mt-2">
                     간병인을 찾고 있어요
@@ -60,13 +60,13 @@ const RegisterPage: NextPage = () => {
 
                 <button
                   onClick={() => setSelectedRole('caregiver')}
-                  className={`p-6 rounded-2xl border-2 transition-all ${
+                  className={`p-6 rounded-lg border-2 transition-all ${
                     selectedRole === 'caregiver'
                       ? 'border-caregiver bg-caregiver/10'
                       : 'border-muted hover:border-caregiver/50'
                   }`}
                 >
-                  <div className="text-4xl mb-3">💪</div>
+                  <div className="text-2xl font-mono text-caregiver mb-3">[C]</div>
                   <div className="text-lg font-bold">간병인</div>
                   <p className="text-sm text-muted-foreground mt-2">
                     일자리를 찾고 있어요
@@ -94,7 +94,7 @@ const RegisterPage: NextPage = () => {
                   size="lg"
                   className="w-full bg-[#FEE500] hover:bg-[#FDD835] text-[#191919] font-bold gap-3"
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                     <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.833 1.857 5.315 4.656 6.745-.147.544-.535 1.975-.613 2.283-.097.385.141.38.297.277.123-.081 1.956-1.327 2.755-1.87.602.088 1.223.134 1.856.134 5.523 0 10-3.582 10-8s-4.477-8-10-8z" />
                   </svg>
                   카카오로 가입하기
@@ -105,7 +105,7 @@ const RegisterPage: NextPage = () => {
                   size="lg"
                   className="w-full bg-[#03C75A] hover:bg-[#02b350] text-white font-bold gap-3"
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                     <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z" />
                   </svg>
                   네이버로 가입하기

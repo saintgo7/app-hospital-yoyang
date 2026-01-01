@@ -64,7 +64,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
           <StatCard
             title="전체 지원"
             value={stats.totalApplications}
-            icon="📝"
+            icon="[N]"
           />
           <StatCard
             title="대기 중"
@@ -75,17 +75,17 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
           <StatCard
             title="수락됨"
             value={stats.acceptedApplications}
-            icon="✅"
+            icon="[v]"
             variant="success"
           />
         </div>
 
         {/* 빠른 메뉴 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <QuickMenu href="/jobs" icon="🔍" label="일자리 찾기" />
-          <QuickMenu href="/caregiver/applications" icon="📋" label="지원 현황" />
-          <QuickMenu href="/caregiver/profile" icon="👤" label="내 프로필" />
-          <QuickMenu href="/chat" icon="💬" label="채팅" />
+          <QuickMenu href="/jobs" icon="" label="일자리 찾기" />
+          <QuickMenu href="/caregiver/applications" icon="[#]" label="지원 현황" />
+          <QuickMenu href="/caregiver/profile" icon="[U]" label="내 프로필" />
+          <QuickMenu href="/chat" icon="[...]" label="채팅" />
         </div>
 
         {/* 최근 지원 내역 */}

@@ -78,7 +78,7 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
         {rooms.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <div className="text-5xl mb-4">💬</div>
+              <div className="text-5xl mb-4">[...]</div>
               <p className="text-lg text-muted-foreground mb-2">
                 아직 대화가 없습니다.
               </p>

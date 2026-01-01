@@ -94,7 +94,7 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
                         : 'border-muted'
                     }`}
                   >
-                    <div className="text-2xl mb-2">👨‍👩‍👧</div>
+                    <div className="text-2xl mb-2">[G]</div>
                     <div className="text-base font-bold">보호자</div>
                   </button>
                   <button
@@ -106,7 +106,7 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
                         : 'border-muted'
                     }`}
                   >
-                    <div className="text-2xl mb-2">💪</div>
+                    <div className="text-2xl mb-2">[C]</div>
                     <div className="text-base font-bold">간병인</div>
                   </button>
                 </div>
