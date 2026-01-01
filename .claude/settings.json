@@ -14,5 +14,25 @@
   },
   "env": {
     "NODE_ENV": "development"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "pattern": "git commit",
+        "hook": {
+          "type": "prompt",
+          "prompt": "커밋이 완료되었습니다. 다음을 수행하세요:\n1. docs/dev-logs/PROJECT-STATUS.md의 커밋 히스토리 업데이트\n2. 오늘 날짜의 개발 로그 파일에 커밋 정보 추가\n3. 진행률 업데이트 (필요시)"
+        }
+      }
+    ],
+    "Stop": [
+      {
+        "hook": {
+          "type": "prompt",
+          "prompt": "세션을 종료하기 전에:\n1. 오늘 작업한 내용을 docs/dev-logs/에 기록했는지 확인\n2. PROJECT-STATUS.md가 최신 상태인지 확인\n3. 미완료 작업이 있다면 '다음 작업'에 기록"
+        }
+      }
+    ]
   }
 }
