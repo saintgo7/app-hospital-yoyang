@@ -1,0 +1,13 @@
+# 케어매치 V3 robots.txt
+User-agent: *
+Allow: /
+
+# 사이트맵
+Sitemap: https://carematch.kr/sitemap.xml
+
+# 크롤링 제외 (개인정보 보호)
+Disallow: /api/
+Disallow: /chat/
+Disallow: /auth/
+Disallow: /caregiver/profile
+Disallow: /guardian/jobs/new

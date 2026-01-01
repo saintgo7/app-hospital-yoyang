@@ -20,8 +20,10 @@ export default async function handler(
       return handleGet(req, res, id, session.user.id)
     case 'PATCH':
       return handlePatch(req, res, id, session.user.id, session.user.role)
+    case 'DELETE':
+      return handleDelete(req, res, id, session.user.id, session.user.role)
     default:
-      res.setHeader('Allow', ['GET', 'PATCH'])
+      res.setHeader('Allow', ['GET', 'PATCH', 'DELETE'])
       return res.status(405).json({ error: `Method ${req.method} Not Allowed` })
   }
 }
@@ -135,4 +137,51 @@ async function handlePatch(
   }
 
   return res.status(200).json({ success: true, application: updatedApplication })
+}
+
+async function handleDelete(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  applicationId: string,
+  userId: string,
+  role: string
+) {
+  // 간병인만 지원 취소 가능
+  if (role !== 'caregiver') {
+    return res.status(403).json({ error: '간병인만 지원을 취소할 수 있습니다.' })
+  }
+
+  const supabase = createServerClient()
+
+  // 지원 내역 조회 및 권한 확인
+  const { data: application, error: fetchError } = await supabase
+    .from('applications')
+    .select('*')
+    .eq('id', applicationId)
+    .single()
+
+  if (fetchError || !application) {
+    return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
+  }
+
+  if (application.caregiver_id !== userId) {
+    return res.status(403).json({ error: '본인의 지원만 취소할 수 있습니다.' })
+  }
+
+  if (application.status !== 'pending') {
+    return res.status(400).json({ error: '대기 중인 지원만 취소할 수 있습니다.' })
+  }
+
+  // 삭제
+  const { error } = await supabase
+    .from('applications')
+    .delete()
+    .eq('id', applicationId)
+
+  if (error) {
+    console.error('Application delete error:', error)
+    return res.status(500).json({ error: '지원 취소에 실패했습니다.' })
+  }
+
+  return res.status(200).json({ success: true })
 }

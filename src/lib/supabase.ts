@@ -11,6 +11,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
 /**
+ * Supabase 브라우저 클라이언트 생성
+ * @description 클라이언트 사이드에서 사용하는 새 인스턴스 생성
+ */
+export function createBrowserClient() {
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
+    },
+  })
+}
+
+/**
  * Supabase 서버 클라이언트 생성
  * @description API 라우트에서 사용하는 서버용 클라이언트
  */
