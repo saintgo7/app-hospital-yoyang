@@ -1,0 +1,177 @@
+{
+  "$schema": "https://mcp.anthropic.com/schemas/mcp-config.json",
+  "version": "1.0",
+  "name": "carematch-v3-mcp",
+  "description": "CareMatch V3 프로젝트를 위한 MCP 설정",
+  
+  "servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-server-filesystem",
+        "--allow-dir", ".",
+        "--allow-dir", "/tmp"
+      ],
+      "description": "파일 시스템 접근 (프로젝트 디렉토리)"
+    },
+    
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-server-supabase"
+      ],
+      "env": {
+        "SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+      },
+      "description": "Supabase 데이터베이스 접근"
+    },
+    
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-server-git"
+      ],
+      "description": "Git 버전 관리"
+    },
+    
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-server-fetch"
+      ],
+      "description": "웹 페이지 및 API 호출"
+    }
+  },
+  
+  "tools": {
+    "filesystem": {
+      "enabled": true,
+      "allowedOperations": [
+        "read",
+        "write",
+        "create",
+        "delete",
+        "list",
+        "search"
+      ],
+      "excludePaths": [
+        "node_modules",
+        ".next",
+        ".git",
+        "dist",
+        "*.log"
+      ]
+    },
+    
+    "supabase": {
+      "enabled": true,
+      "allowedOperations": [
+        "query",
+        "insert",
+        "update",
+        "delete",
+        "rpc"
+      ],
+      "protectedTables": [
+        "auth.users"
+      ]
+    },
+    
+    "git": {
+      "enabled": true,
+      "allowedOperations": [
+        "status",
+        "add",
+        "commit",
+        "push",
+        "pull",
+        "branch",
+        "checkout",
+        "log",
+        "diff"
+      ]
+    },
+    
+    "fetch": {
+      "enabled": true,
+      "allowedDomains": [
+        "*.supabase.co",
+        "*.kakao.com",
+        "*.naver.com",
+        "api.openai.com",
+        "localhost:3000"
+      ]
+    }
+  },
+  
+  "prompts": {
+    "project-overview": {
+      "name": "프로젝트 개요",
+      "description": "CareMatch V3 프로젝트 개요를 설명합니다",
+      "template": "CareMatch V3는 요양병원/요양원 간병인과 보호자를 연결하는 구인구직 플랫폼입니다. 주요 기술 스택: Next.js 14 (Pages Router), TypeScript, Supabase, shadcn/ui. 대상 사용자: 50-70세 고령층 (접근성 최우선)."
+    },
+    
+    "tech-stack": {
+      "name": "기술 스택",
+      "description": "프로젝트에서 사용하는 기술 스택을 설명합니다",
+      "template": "Frontend: Next.js 14 (Pages Router), TypeScript, shadcn/ui, TailwindCSS. Backend: Next.js API Routes, NextAuth.js. Database: Supabase PostgreSQL. Realtime: Supabase Realtime. Notification: Kakao Alimtalk. Deploy: Vercel."
+    },
+    
+    "accessibility-rules": {
+      "name": "접근성 규칙",
+      "description": "고령자 친화적 UI/UX 규칙을 설명합니다",
+      "template": "대상: 50-70세 고령층. 규칙: 최소 폰트 16px, 기본 18px. 버튼 최소 48x48px. 색상 대비 4.5:1 이상. 아이콘은 텍스트와 함께. 에러 메시지 친절하게."
+    },
+    
+    "coding-conventions": {
+      "name": "코딩 컨벤션",
+      "description": "프로젝트 코딩 규칙을 설명합니다",
+      "template": "컴포넌트: PascalCase, FC 타입 사용. Props: 인터페이스 필수. 주석: JSDoc 형식. 파일명: 컴포넌트는 PascalCase, 페이지는 kebab-case. 스타일: TailwindCSS 클래스 사용."
+    }
+  },
+  
+  "resources": {
+    "project-docs": {
+      "type": "directory",
+      "path": "./docs",
+      "description": "프로젝트 문서"
+    },
+    
+    "components": {
+      "type": "directory", 
+      "path": "./src/components",
+      "description": "React 컴포넌트"
+    },
+    
+    "pages": {
+      "type": "directory",
+      "path": "./src/pages",
+      "description": "Next.js 페이지"
+    },
+    
+    "api-routes": {
+      "type": "directory",
+      "path": "./src/pages/api",
+      "description": "API 라우트"
+    },
+    
+    "migrations": {
+      "type": "directory",
+      "path": "./supabase/migrations",
+      "description": "DB 마이그레이션"
+    }
+  },
+  
+  "settings": {
+    "maxTokens": 8192,
+    "temperature": 0.7,
+    "topP": 0.9,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0
+  }
+}
