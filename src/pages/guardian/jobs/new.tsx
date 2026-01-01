@@ -79,8 +79,8 @@ const NewJobPage: NextPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle className="text-accessible-2xl">구인글 작성</CardTitle>
-            <CardDescription className="text-accessible-base">
+            <CardTitle className="text-2xl">구인글 작성</CardTitle>
+            <CardDescription className="text-base">
               상세한 정보를 작성하면 더 많은 간병인에게 노출됩니다.
             </CardDescription>
           </CardHeader>
@@ -88,7 +88,7 @@ const NewJobPage: NextPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-accessible-base">
+                <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-base">
                   {error}
                 </div>
               )}
@@ -116,7 +116,7 @@ const NewJobPage: NextPage = () => {
                       key={type.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, careType: type.value })}
-                      className={`p-3 rounded-xl border-2 text-accessible-base transition-all ${
+                      className={`p-3 rounded-lg border-2 text-base transition-all ${
                         formData.careType === type.value
                           ? 'border-guardian bg-guardian/10 font-bold'
                           : 'border-muted'
@@ -186,14 +186,14 @@ const NewJobPage: NextPage = () => {
                     원
                   </span>
                 </div>
-                <p className="text-accessible-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   2024년 최저시급: 9,860원
                 </p>
               </div>
 
               {/* 환자 정보 */}
-              <div className="space-y-4 p-4 bg-muted/50 rounded-xl">
-                <h3 className="text-accessible-lg font-bold">환자 정보</h3>
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-lg font-bold">환자 정보</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
@@ -217,7 +217,7 @@ const NewJobPage: NextPage = () => {
                           key={gender}
                           type="button"
                           onClick={() => setFormData({ ...formData, patientGender: gender })}
-                          className={`flex-1 p-3 rounded-xl border-2 text-accessible-base transition-all ${
+                          className={`flex-1 p-3 rounded-lg border-2 text-base transition-all ${
                             formData.patientGender === gender
                               ? 'border-guardian bg-guardian/10 font-bold'
                               : 'border-muted'
@@ -260,7 +260,7 @@ const NewJobPage: NextPage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  size="xl"
+                  size="lg"
                   className="flex-1"
                   onClick={() => router.back()}
                 >
@@ -269,7 +269,7 @@ const NewJobPage: NextPage = () => {
                 <Button
                   type="submit"
                   variant="guardian"
-                  size="xl"
+                  size="lg"
                   className="flex-1"
                   disabled={isSubmitting}
                 >

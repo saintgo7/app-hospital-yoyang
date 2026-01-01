@@ -108,46 +108,46 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle className="text-accessible-2xl">내 프로필</CardTitle>
+            <CardTitle className="text-2xl">내 프로필</CardTitle>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-8">
               {error && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-accessible-base">
+                <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-base">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-100 text-green-800 p-4 rounded-xl text-accessible-base">
+                <div className="bg-green-100 text-green-800 p-4 rounded-lg text-base">
                   프로필이 저장되었습니다!
                 </div>
               )}
 
               {/* 기본 정보 */}
-              <div className="space-y-4 p-4 bg-muted/50 rounded-xl">
-                <h3 className="text-accessible-lg font-bold">기본 정보</h3>
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-lg font-bold">기본 정보</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-accessible-sm text-muted-foreground">이름</Label>
-                    <p className="text-accessible-base font-medium">{user.name}</p>
+                    <Label className="text-sm text-muted-foreground">이름</Label>
+                    <p className="text-base font-medium">{user.name}</p>
                   </div>
                   <div>
-                    <Label className="text-accessible-sm text-muted-foreground">이메일</Label>
-                    <p className="text-accessible-base font-medium">{user.email}</p>
+                    <Label className="text-sm text-muted-foreground">이메일</Label>
+                    <p className="text-base font-medium">{user.email}</p>
                   </div>
                 </div>
               </div>
 
               {/* 구직 상태 */}
               <div className="space-y-3">
-                <Label className="text-accessible-lg font-bold">구직 상태</Label>
+                <Label className="text-lg font-bold">구직 상태</Label>
                 <div className="flex gap-4">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isAvailable: true })}
-                    className={`flex-1 p-4 rounded-xl border-2 text-accessible-base transition-all ${
+                    className={`flex-1 p-4 rounded-lg border-2 text-base transition-all ${
                       formData.isAvailable
                         ? 'border-caregiver bg-caregiver/10 font-bold'
                         : 'border-muted'
@@ -158,7 +158,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isAvailable: false })}
-                    className={`flex-1 p-4 rounded-xl border-2 text-accessible-base transition-all ${
+                    className={`flex-1 p-4 rounded-lg border-2 text-base transition-all ${
                       !formData.isAvailable
                         ? 'border-muted-foreground bg-muted font-bold'
                         : 'border-muted'
@@ -221,7 +221,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                     <Badge
                       key={cert}
                       variant={formData.certifications.includes(cert) ? 'caregiver' : 'outline'}
-                      className="cursor-pointer text-accessible-base py-2 px-4"
+                      className="cursor-pointer text-base py-2 px-4"
                       onClick={() => toggleCertification(cert)}
                     >
                       {formData.certifications.includes(cert) ? '✓ ' : ''}
@@ -239,7 +239,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                     <Badge
                       key={spec}
                       variant={formData.specializations.includes(spec) ? 'caregiver' : 'outline'}
-                      className="cursor-pointer text-accessible-base py-2 px-4"
+                      className="cursor-pointer text-base py-2 px-4"
                       onClick={() => toggleSpecialization(spec)}
                     >
                       {formData.specializations.includes(spec) ? '✓ ' : ''}
@@ -266,7 +266,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                 <Button
                   type="button"
                   variant="outline"
-                  size="xl"
+                  size="lg"
                   className="flex-1"
                   onClick={() => router.back()}
                 >
@@ -275,7 +275,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                 <Button
                   type="submit"
                   variant="caregiver"
-                  size="xl"
+                  size="lg"
                   className="flex-1"
                   disabled={isSubmitting}
                 >

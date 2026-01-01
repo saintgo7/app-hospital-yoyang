@@ -12,12 +12,12 @@ const Home: NextPage = () => {
       {/* 히어로 섹션 */}
       <section className="bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-accessible-3xl font-bold text-foreground mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
             믿을 수 있는 간병인을
             <br />
             쉽고 빠르게 찾으세요
           </h1>
-          <p className="text-accessible-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
             케어매치는 요양병원, 요양원의 간병인과 보호자를 연결합니다.
             <br />
             검증된 간병인, 투명한 정보, 실시간 소통을 경험하세요.
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
             <Link href="/auth/register?type=guardian">
               <Button
                 variant="guardian"
-                size="xl"
+                size="lg"
                 className="w-full sm:w-auto gap-3"
               >
                 <span className="text-2xl">👨‍👩‍👧</span>
@@ -37,7 +37,7 @@ const Home: NextPage = () => {
             <Link href="/auth/register?type=caregiver">
               <Button
                 variant="caregiver"
-                size="xl"
+                size="lg"
                 className="w-full sm:w-auto gap-3"
               >
                 <span className="text-2xl">💪</span>
@@ -50,7 +50,7 @@ const Home: NextPage = () => {
 
       {/* 특징 섹션 */}
       <section className="container mx-auto px-4 py-20">
-        <h2 className="text-accessible-2xl font-bold text-center mb-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
           왜 케어매치인가요?
         </h2>
 
@@ -87,16 +87,14 @@ const Home: NextPage = () => {
 
       {/* CTA 섹션 */}
       <section className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-accessible-2xl font-bold mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">
           지금 바로 시작하세요
         </h2>
-        <p className="text-accessible-lg text-muted-foreground mb-8">
+        <p className="text-lg text-muted-foreground mb-8">
           간병인이든 보호자든, 케어매치가 함께합니다.
         </p>
         <Link href="/auth/register">
-          <Button size="xl" className="text-accessible-lg">
-            무료로 시작하기
-          </Button>
+          <Button size="lg">무료로 시작하기</Button>
         </Link>
       </section>
     </Layout>
@@ -114,10 +112,10 @@ function FeatureCard({
   description: string
 }) {
   return (
-    <div className="bg-card rounded-2xl p-8 text-center shadow-sm border">
+    <div className="bg-card rounded-lg p-8 text-center shadow-sm border">
       <div className="text-5xl mb-4">{icon}</div>
-      <h3 className="text-accessible-lg font-bold mb-3">{title}</h3>
-      <p className="text-accessible-base text-muted-foreground">{description}</p>
+      <h3 className="text-lg font-bold mb-3">{title}</h3>
+      <p className="text-base text-muted-foreground">{description}</p>
     </div>
   )
 }
@@ -126,10 +124,8 @@ function FeatureCard({
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-accessible-2xl font-bold text-primary">{value}</div>
-      <div className="text-accessible-base text-muted-foreground mt-2">
-        {label}
-      </div>
+      <div className="text-2xl md:text-3xl font-bold text-primary">{value}</div>
+      <div className="text-base text-muted-foreground mt-2">{label}</div>
     </div>
   )
 }

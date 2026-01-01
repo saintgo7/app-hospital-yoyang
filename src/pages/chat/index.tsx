@@ -67,8 +67,8 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
     <Layout title="채팅">
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">채팅</h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <h1 className="text-2xl font-bold mb-2">채팅</h1>
+          <p className="text-base text-muted-foreground">
             {role === 'guardian'
               ? '간병인과의 대화 목록입니다.'
               : '보호자와의 대화 목록입니다.'}
@@ -79,10 +79,10 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">💬</div>
-              <p className="text-accessible-lg text-muted-foreground mb-2">
+              <p className="text-lg text-muted-foreground mb-2">
                 아직 대화가 없습니다.
               </p>
-              <p className="text-accessible-base text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 {role === 'guardian'
                   ? '지원자를 수락하면 채팅이 시작됩니다.'
                   : '지원이 수락되면 채팅이 시작됩니다.'}
@@ -112,7 +112,7 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-accessible-base font-bold truncate">
+                            <h3 className="text-base font-bold truncate">
                               {otherUser.name}
                             </h3>
                             {room.job && (
@@ -125,12 +125,12 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
                           </div>
 
                           {room.lastMessage ? (
-                            <p className="text-accessible-sm text-muted-foreground truncate">
+                            <p className="text-sm text-muted-foreground truncate">
                               {room.lastMessage.sender_id === currentUserId && '나: '}
                               {room.lastMessage.content}
                             </p>
                           ) : (
-                            <p className="text-accessible-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                               대화를 시작해보세요
                             </p>
                           )}
@@ -138,7 +138,7 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
 
                         <div className="text-right shrink-0">
                           {room.lastMessage && (
-                            <p className="text-accessible-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                               {getTimeAgo(room.lastMessage.created_at)}
                             </p>
                           )}

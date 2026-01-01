@@ -30,10 +30,10 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
       <div className="container mx-auto px-4 py-8">
         {/* 환영 메시지 */}
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">
+          <h1 className="text-2xl font-bold mb-2">
             안녕하세요, {user.name}님! 👋
           </h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             오늘도 좋은 하루 되세요.
           </p>
         </div>
@@ -43,10 +43,10 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
           <Card className="mb-8 border-caregiver bg-caregiver/5">
             <CardContent className="p-6 flex items-center justify-between">
               <div>
-                <h3 className="text-accessible-lg font-bold mb-2">
+                <h3 className="text-lg font-bold mb-2">
                   프로필을 완성해주세요!
                 </h3>
-                <p className="text-accessible-base text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   프로필이 완성되면 보호자에게 더 많이 노출됩니다.
                 </p>
               </div>
@@ -91,7 +91,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
         {/* 최근 지원 내역 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-accessible-lg">최근 지원 내역</CardTitle>
+            <CardTitle className="text-lg">최근 지원 내역</CardTitle>
             <Link href="/caregiver/applications">
               <Button variant="ghost" size="sm">
                 전체보기
@@ -102,7 +102,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
             {applications.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-4xl mb-4">📭</div>
-                <p className="text-accessible-base text-muted-foreground mb-4">
+                <p className="text-base text-muted-foreground mb-4">
                   아직 지원한 일자리가 없습니다.
                 </p>
                 <Link href="/jobs">
@@ -148,8 +148,8 @@ function StatCard({
       <CardContent className="p-6 flex items-center gap-4">
         <div className="text-4xl">{icon}</div>
         <div>
-          <p className="text-accessible-sm text-muted-foreground">{title}</p>
-          <p className="text-accessible-2xl font-bold">{value}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -171,7 +171,7 @@ function QuickMenu({
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardContent className="p-6 text-center">
           <div className="text-3xl mb-2">{icon}</div>
-          <p className="text-accessible-base font-medium">{label}</p>
+          <p className="text-base font-medium">{label}</p>
         </CardContent>
       </Card>
     </Link>
@@ -197,10 +197,10 @@ function ApplicationCard({
   }
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-xl">
+    <div className="flex items-center justify-between p-4 border rounded-lg">
       <div>
-        <h4 className="text-accessible-base font-bold">{application.job.title}</h4>
-        <p className="text-accessible-sm text-muted-foreground">
+        <h4 className="text-base font-bold">{application.job.title}</h4>
+        <p className="text-sm text-muted-foreground">
           {application.job.location}
         </p>
       </div>

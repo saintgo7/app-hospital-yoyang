@@ -37,7 +37,7 @@ export const ReviewCard: FC<ReviewCardProps> = ({
           <div className="flex-1 min-w-0">
             {/* 리뷰어 정보 */}
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-accessible-base font-bold truncate">
+              <span className="text-base font-bold truncate">
                 {review.reviewer.name}
               </span>
               <Badge variant="outline" className="text-xs shrink-0">
@@ -47,14 +47,14 @@ export const ReviewCard: FC<ReviewCardProps> = ({
 
             {/* 리뷰 대상 (옵션) */}
             {showReviewee && (
-              <p className="text-accessible-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 {review.reviewee.name}님에게 작성한 리뷰
               </p>
             )}
 
             {/* 일자리 정보 (옵션) */}
             {showJob && review.job && (
-              <p className="text-accessible-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 {review.job.title}
               </p>
             )}
@@ -80,20 +80,20 @@ export const ReviewCard: FC<ReviewCardProps> = ({
                   />
                 </svg>
               ))}
-              <span className="ml-2 text-accessible-sm text-muted-foreground">
+              <span className="ml-2 text-sm text-muted-foreground">
                 {review.rating}.0
               </span>
             </div>
 
             {/* 리뷰 내용 */}
             {review.comment && (
-              <p className="text-accessible-base text-foreground whitespace-pre-wrap">
+              <p className="text-base text-foreground whitespace-pre-wrap">
                 {review.comment}
               </p>
             )}
 
             {/* 작성일 */}
-            <p className="mt-3 text-accessible-sm text-muted-foreground">
+            <p className="mt-3 text-sm text-muted-foreground">
               {getTimeAgo(review.created_at)}
             </p>
           </div>
@@ -113,9 +113,9 @@ export const ReviewSummary: FC<ReviewSummaryProps> = ({
   totalCount,
 }) => {
   return (
-    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
       <div className="text-center">
-        <div className="text-accessible-2xl font-bold text-primary">
+        <div className="text-2xl font-bold text-primary">
           {averageRating.toFixed(1)}
         </div>
         <div className="flex items-center justify-center gap-0.5 mt-1">
@@ -140,7 +140,7 @@ export const ReviewSummary: FC<ReviewSummaryProps> = ({
           ))}
         </div>
       </div>
-      <div className="text-accessible-base text-muted-foreground">
+      <div className="text-base text-muted-foreground">
         총 <span className="font-bold text-foreground">{totalCount}</span>개의 리뷰
       </div>
     </div>

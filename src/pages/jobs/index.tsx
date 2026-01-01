@@ -42,8 +42,8 @@ const JobsPage: NextPage<Props> = ({ jobs: initialJobs, locations }) => {
       <div className="container mx-auto px-4 py-8">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">구인 정보</h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <h1 className="text-2xl font-bold mb-2">구인 정보</h1>
+          <p className="text-base text-muted-foreground">
             {jobs.length}개의 일자리가 있습니다
           </p>
         </div>
@@ -88,7 +88,7 @@ const JobsPage: NextPage<Props> = ({ jobs: initialJobs, locations }) => {
         {filteredJobs.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🔍</div>
-            <p className="text-accessible-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               조건에 맞는 구인글이 없습니다.
             </p>
           </div>
@@ -120,15 +120,15 @@ function JobCard({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-accessible-lg font-bold">{job.title}</h3>
+                <h3 className="text-lg font-bold">{job.title}</h3>
                 <Badge variant="caregiver">모집 중</Badge>
               </div>
 
-              <p className="text-accessible-base text-muted-foreground mb-3 line-clamp-2">
+              <p className="text-base text-muted-foreground mb-3 line-clamp-2">
                 {job.description}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-accessible-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span>📍 {job.location}</span>
                 <span>🏥 {job.care_type}</span>
                 {patientInfo?.age && <span>👤 {patientInfo.age}세</span>}
@@ -137,11 +137,11 @@ function JobCard({
             </div>
 
             <div className="text-right">
-              <p className="text-accessible-xl font-bold text-primary">
+              <p className="text-xl font-bold text-primary">
                 {formatCurrency(job.hourly_rate)}
               </p>
-              <p className="text-accessible-sm text-muted-foreground">/시간</p>
-              <p className="text-accessible-sm text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground">/시간</p>
+              <p className="text-sm text-muted-foreground mt-2">
                 {getTimeAgo(job.created_at)}
               </p>
             </div>

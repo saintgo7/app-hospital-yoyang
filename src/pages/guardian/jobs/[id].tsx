@@ -98,10 +98,10 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-accessible-2xl font-bold">{job.title}</h1>
+              <h1 className="text-2xl font-bold">{job.title}</h1>
               <JobStatusBadge status={jobStatus} />
             </div>
-            <p className="text-accessible-base text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {formatDate(job.created_at)}에 작성
             </p>
           </div>
@@ -144,49 +144,49 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
           <div className="lg:col-span-1 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-accessible-lg">구인 정보</CardTitle>
+                <CardTitle className="text-lg">구인 정보</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-accessible-sm text-muted-foreground">근무지</p>
-                  <p className="text-accessible-base font-medium">{job.location}</p>
+                  <p className="text-sm text-muted-foreground">근무지</p>
+                  <p className="text-base font-medium">{job.location}</p>
                 </div>
                 <div>
-                  <p className="text-accessible-sm text-muted-foreground">시급</p>
-                  <p className="text-accessible-lg font-bold text-primary">
+                  <p className="text-sm text-muted-foreground">시급</p>
+                  <p className="text-lg font-bold text-primary">
                     {formatCurrency(job.hourly_rate)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-accessible-sm text-muted-foreground">근무 시작일</p>
-                  <p className="text-accessible-base font-medium">{formatDate(job.start_date)}</p>
+                  <p className="text-sm text-muted-foreground">근무 시작일</p>
+                  <p className="text-base font-medium">{formatDate(job.start_date)}</p>
                 </div>
                 <div>
-                  <p className="text-accessible-sm text-muted-foreground">간병 유형</p>
-                  <p className="text-accessible-base font-medium">{job.care_type}</p>
+                  <p className="text-sm text-muted-foreground">간병 유형</p>
+                  <p className="text-base font-medium">{job.care_type}</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-accessible-lg">환자 정보</CardTitle>
+                <CardTitle className="text-lg">환자 정보</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-accessible-sm text-muted-foreground">나이</p>
-                    <p className="text-accessible-base font-medium">{patientInfo?.age || '-'}세</p>
+                    <p className="text-sm text-muted-foreground">나이</p>
+                    <p className="text-base font-medium">{patientInfo?.age || '-'}세</p>
                   </div>
                   <div>
-                    <p className="text-accessible-sm text-muted-foreground">성별</p>
-                    <p className="text-accessible-base font-medium">{patientInfo?.gender || '-'}</p>
+                    <p className="text-sm text-muted-foreground">성별</p>
+                    <p className="text-base font-medium">{patientInfo?.gender || '-'}</p>
                   </div>
                 </div>
                 {patientInfo?.condition && (
                   <div>
-                    <p className="text-accessible-sm text-muted-foreground">상태/증상</p>
-                    <p className="text-accessible-base font-medium">{patientInfo.condition}</p>
+                    <p className="text-sm text-muted-foreground">상태/증상</p>
+                    <p className="text-base font-medium">{patientInfo.condition}</p>
                   </div>
                 )}
               </CardContent>
@@ -194,10 +194,10 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-accessible-lg">상세 설명</CardTitle>
+                <CardTitle className="text-lg">상세 설명</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-accessible-base whitespace-pre-wrap">{job.description}</p>
+                <p className="text-base whitespace-pre-wrap">{job.description}</p>
               </CardContent>
             </Card>
           </div>
@@ -206,7 +206,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-accessible-lg">
+                <CardTitle className="text-lg">
                   지원자 ({applications.length}명)
                 </CardTitle>
               </CardHeader>
@@ -214,7 +214,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                 {applications.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-4xl mb-4">📭</div>
-                    <p className="text-accessible-base text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       아직 지원자가 없습니다.
                     </p>
                   </div>
@@ -223,7 +223,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {/* 대기 중 */}
                     {pendingApplications.length > 0 && (
                       <div>
-                        <h4 className="text-accessible-base font-bold mb-4 flex items-center gap-2">
+                        <h4 className="text-base font-bold mb-4 flex items-center gap-2">
                           ⏳ 대기 중 ({pendingApplications.length}명)
                         </h4>
                         <div className="space-y-4">
@@ -243,7 +243,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {/* 수락됨 */}
                     {acceptedApplications.length > 0 && (
                       <div>
-                        <h4 className="text-accessible-base font-bold mb-4 flex items-center gap-2">
+                        <h4 className="text-base font-bold mb-4 flex items-center gap-2">
                           ✅ 수락됨 ({acceptedApplications.length}명)
                         </h4>
                         <div className="space-y-4">
@@ -257,7 +257,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {/* 거절됨 */}
                     {rejectedApplications.length > 0 && (
                       <div>
-                        <h4 className="text-accessible-base font-bold mb-4 flex items-center gap-2 text-muted-foreground">
+                        <h4 className="text-base font-bold mb-4 flex items-center gap-2 text-muted-foreground">
                           ❌ 거절됨 ({rejectedApplications.length}명)
                         </h4>
                         <div className="space-y-4 opacity-60">
@@ -306,7 +306,7 @@ function ApplicantCard({
   const profile = caregiver.caregiver_profile?.[0] || null
 
   return (
-    <div className="p-4 border rounded-xl">
+    <div className="p-4 border rounded-lg">
       <div className="flex items-start gap-4">
         <Avatar className="h-14 w-14">
           <AvatarImage src={caregiver.avatar_url || undefined} />
@@ -315,7 +315,7 @@ function ApplicantCard({
 
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h5 className="text-accessible-base font-bold">{caregiver.name}</h5>
+            <h5 className="text-base font-bold">{caregiver.name}</h5>
             {profile?.is_available && (
               <Badge variant="caregiver" className="text-xs">
                 구직 중
@@ -323,7 +323,7 @@ function ApplicantCard({
             )}
           </div>
 
-          <div className="flex flex-wrap gap-3 text-accessible-sm text-muted-foreground mb-2">
+          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-2">
             {profile?.experience_years && <span>경력 {profile.experience_years}년</span>}
             {profile?.hourly_rate && <span>희망 {formatCurrency(profile.hourly_rate)}/시간</span>}
             {profile?.location && <span>📍 {profile.location}</span>}
@@ -341,7 +341,7 @@ function ApplicantCard({
 
           {application.message && (
             <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-              <p className="text-accessible-sm">{application.message}</p>
+              <p className="text-sm">{application.message}</p>
             </div>
           )}
         </div>

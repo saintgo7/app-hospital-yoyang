@@ -29,8 +29,8 @@ const AuthErrorPage: NextPage = () => {
         <Card className="w-full max-w-md text-center">
           <CardHeader className="space-y-4">
             <div className="text-6xl">😔</div>
-            <CardTitle className="text-accessible-2xl">문제가 발생했어요</CardTitle>
-            <CardDescription className="text-accessible-base">
+            <CardTitle className="text-2xl">문제가 발생했어요</CardTitle>
+            <CardDescription className="text-base">
               {errorMessage}
             </CardDescription>
           </CardHeader>
@@ -38,7 +38,7 @@ const AuthErrorPage: NextPage = () => {
           <CardContent className="space-y-4">
             <Button
               onClick={() => router.push('/auth/login')}
-              size="xl"
+              size="lg"
               className="w-full"
             >
               다시 로그인하기

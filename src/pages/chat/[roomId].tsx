@@ -218,9 +218,9 @@ const ChatRoomPage: NextPage<Props> = ({
           </Avatar>
 
           <div className="flex-1">
-            <h1 className="text-accessible-base font-bold">{otherUser.name}</h1>
+            <h1 className="text-base font-bold">{otherUser.name}</h1>
             {room.job && (
-              <p className="text-accessible-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {room.job.title}
               </p>
             )}
@@ -251,7 +251,7 @@ const ChatRoomPage: NextPage<Props> = ({
               {/* 날짜 구분선 */}
               <div className="flex items-center justify-center my-4">
                 <div className="bg-muted px-4 py-1 rounded-full">
-                  <span className="text-accessible-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                     {formatDate(group.date)}
                   </span>
                 </div>
@@ -287,7 +287,7 @@ const ChatRoomPage: NextPage<Props> = ({
                             : 'bg-muted rounded-bl-sm'
                         }`}
                       >
-                        <p className="text-accessible-base whitespace-pre-wrap break-words">
+                        <p className="text-base whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
                       </div>
@@ -321,7 +321,7 @@ const ChatRoomPage: NextPage<Props> = ({
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="메시지를 입력하세요..."
-              className="min-h-[48px] max-h-[120px] text-accessible-base resize-none"
+              className="min-h-[48px] max-h-[120px] text-base resize-none"
               rows={1}
               disabled={isSending}
             />

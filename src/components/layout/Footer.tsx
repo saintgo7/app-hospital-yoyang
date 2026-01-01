@@ -3,7 +3,6 @@ import Link from 'next/link'
 
 /**
  * 푸터 컴포넌트
- * @description 접근성 최적화된 푸터 (큰 텍스트, 명확한 링크)
  */
 export const Footer: FC = () => {
   const currentYear = new Date().getFullYear()
@@ -14,10 +13,8 @@ export const Footer: FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* 회사 정보 */}
           <div className="space-y-4">
-            <h3 className="text-accessible-lg font-bold text-primary">
-              케어매치
-            </h3>
-            <p className="text-accessible-base text-muted-foreground">
+            <h3 className="text-lg font-bold text-primary">케어매치</h3>
+            <p className="text-sm text-muted-foreground">
               요양병원·요양원 간병인과
               <br />
               보호자를 연결합니다.
@@ -26,12 +23,12 @@ export const Footer: FC = () => {
 
           {/* 서비스 */}
           <div className="space-y-4">
-            <h4 className="text-accessible-base font-bold">서비스</h4>
+            <h4 className="text-sm font-bold">서비스</h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/jobs"
-                  className="text-accessible-base text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   구인 정보
                 </Link>
@@ -39,7 +36,7 @@ export const Footer: FC = () => {
               <li>
                 <Link
                   href="/caregivers"
-                  className="text-accessible-base text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   간병인 찾기
                 </Link>
@@ -49,20 +46,20 @@ export const Footer: FC = () => {
 
           {/* 고객센터 */}
           <div className="space-y-4">
-            <h4 className="text-accessible-base font-bold">고객센터</h4>
+            <h4 className="text-sm font-bold">고객센터</h4>
             <ul className="space-y-3">
               <li>
                 <a
                   href="tel:1588-0000"
-                  className="text-accessible-lg font-bold text-primary hover:underline"
+                  className="text-lg font-bold text-primary hover:underline"
                 >
-                  📞 1588-0000
+                  1588-0000
                 </a>
               </li>
-              <li className="text-accessible-base text-muted-foreground">
+              <li className="text-sm text-muted-foreground">
                 평일 09:00 - 18:00
               </li>
-              <li className="text-accessible-base text-muted-foreground">
+              <li className="text-sm text-muted-foreground">
                 점심 12:00 - 13:00
               </li>
             </ul>
@@ -70,12 +67,12 @@ export const Footer: FC = () => {
 
           {/* 법적 정보 */}
           <div className="space-y-4">
-            <h4 className="text-accessible-base font-bold">약관 및 정책</h4>
+            <h4 className="text-sm font-bold">약관 및 정책</h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/terms"
-                  className="text-accessible-base text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   이용약관
                 </Link>
@@ -83,7 +80,7 @@ export const Footer: FC = () => {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-accessible-base text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   개인정보처리방침
                 </Link>
@@ -94,7 +91,7 @@ export const Footer: FC = () => {
 
         {/* 저작권 */}
         <div className="mt-12 pt-8 border-t text-center">
-          <p className="text-accessible-base text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} 케어매치. All rights reserved.
           </p>
         </div>

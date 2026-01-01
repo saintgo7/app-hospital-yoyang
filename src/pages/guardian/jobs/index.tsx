@@ -42,8 +42,8 @@ const GuardianJobsPage: NextPage<Props> = ({ jobs: initialJobs }) => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-accessible-2xl font-bold mb-2">내 구인글</h1>
-            <p className="text-accessible-base text-muted-foreground">
+            <h1 className="text-2xl font-bold mb-2">내 구인글</h1>
+            <p className="text-base text-muted-foreground">
               총 {jobs.length}개의 구인글
             </p>
           </div>
@@ -61,7 +61,7 @@ const GuardianJobsPage: NextPage<Props> = ({ jobs: initialJobs }) => {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-xl text-accessible-base transition-all ${
+                className={`px-4 py-2 rounded-lg text-base transition-all ${
                   filter === status
                     ? 'bg-primary text-primary-foreground font-bold'
                     : 'bg-muted hover:bg-muted/80'
@@ -82,7 +82,7 @@ const GuardianJobsPage: NextPage<Props> = ({ jobs: initialJobs }) => {
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">📝</div>
-              <p className="text-accessible-lg text-muted-foreground mb-4">
+              <p className="text-lg text-muted-foreground mb-4">
                 {filter === 'all'
                   ? '아직 등록한 구인글이 없습니다.'
                   : '해당 상태의 구인글이 없습니다.'}
@@ -127,11 +127,11 @@ function JobCard({ job }: { job: JobWithApplications }) {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-accessible-lg font-bold">{job.title}</h3>
+                <h3 className="text-lg font-bold">{job.title}</h3>
                 <Badge variant={variant}>{label}</Badge>
               </div>
 
-              <div className="flex flex-wrap gap-4 text-accessible-base text-muted-foreground">
+              <div className="flex flex-wrap gap-4 text-base text-muted-foreground">
                 <span>📍 {job.location}</span>
                 <span>💰 {formatCurrency(job.hourly_rate)}/시간</span>
                 <span>📅 {new Date(job.start_date).toLocaleDateString('ko-KR')}</span>
@@ -140,25 +140,25 @@ function JobCard({ job }: { job: JobWithApplications }) {
 
             <div className="flex items-center gap-4">
               <div className="text-center">
-                <p className="text-accessible-2xl font-bold">{job.applications.length}</p>
-                <p className="text-accessible-sm text-muted-foreground">지원자</p>
+                <p className="text-2xl font-bold">{job.applications.length}</p>
+                <p className="text-sm text-muted-foreground">지원자</p>
               </div>
 
               {pendingCount > 0 && (
-                <Badge variant="destructive" className="text-accessible-base">
+                <Badge variant="destructive" className="text-base">
                   새 지원 {pendingCount}건
                 </Badge>
               )}
 
               {acceptedCount > 0 && (
-                <Badge variant="success" className="text-accessible-base">
+                <Badge variant="success" className="text-base">
                   수락 {acceptedCount}명
                 </Badge>
               )}
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t text-accessible-sm text-muted-foreground">
+          <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
             {getTimeAgo(job.created_at)}에 작성
           </div>
         </CardContent>

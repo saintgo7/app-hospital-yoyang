@@ -73,28 +73,28 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
-              <Badge variant="caregiver" className="text-accessible-base">
+              <Badge variant="caregiver" className="text-base">
                 모집 중
               </Badge>
-              <span className="text-accessible-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {formatDate(job.created_at)}
               </span>
             </div>
 
-            <h1 className="text-accessible-2xl font-bold mb-4">{job.title}</h1>
+            <h1 className="text-2xl font-bold mb-4">{job.title}</h1>
 
-            <div className="flex items-center gap-4 mb-6 p-4 bg-muted/50 rounded-xl">
+            <div className="flex items-center gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
               <Avatar className="h-14 w-14">
                 <AvatarImage src={job.guardian.avatar_url || undefined} />
                 <AvatarFallback>{job.guardian.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-accessible-base font-bold">{job.guardian.name}</p>
-                <p className="text-accessible-sm text-muted-foreground">보호자</p>
+                <p className="text-base font-bold">{job.guardian.name}</p>
+                <p className="text-sm text-muted-foreground">보호자</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-accessible-base">
+            <div className="grid grid-cols-2 gap-4 text-base">
               <div className="flex items-center gap-2">
                 <span className="text-xl">📍</span>
                 <span>{job.location}</span>
@@ -120,28 +120,28 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
         {/* 환자 정보 */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-accessible-lg">환자 정보</CardTitle>
+            <CardTitle className="text-lg">환자 정보</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-4 bg-muted/50 rounded-xl">
+              <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-2xl mb-1">👤</p>
-                <p className="text-accessible-sm text-muted-foreground">나이</p>
-                <p className="text-accessible-lg font-bold">
+                <p className="text-sm text-muted-foreground">나이</p>
+                <p className="text-lg font-bold">
                   {patientInfo?.age || '-'}세
                 </p>
               </div>
-              <div className="p-4 bg-muted/50 rounded-xl">
+              <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-2xl mb-1">{patientInfo?.gender === '여성' ? '👩' : '👨'}</p>
-                <p className="text-accessible-sm text-muted-foreground">성별</p>
-                <p className="text-accessible-lg font-bold">
+                <p className="text-sm text-muted-foreground">성별</p>
+                <p className="text-lg font-bold">
                   {patientInfo?.gender || '-'}
                 </p>
               </div>
-              <div className="p-4 bg-muted/50 rounded-xl">
+              <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-2xl mb-1">🏥</p>
-                <p className="text-accessible-sm text-muted-foreground">상태</p>
-                <p className="text-accessible-lg font-bold">
+                <p className="text-sm text-muted-foreground">상태</p>
+                <p className="text-lg font-bold">
                   {patientInfo?.condition || '-'}
                 </p>
               </div>
@@ -152,10 +152,10 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
         {/* 상세 설명 */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-accessible-lg">상세 설명</CardTitle>
+            <CardTitle className="text-lg">상세 설명</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-accessible-base whitespace-pre-wrap">
+            <p className="text-base whitespace-pre-wrap">
               {job.description}
             </p>
           </CardContent>
@@ -166,7 +166,7 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
           <Card>
             <CardContent className="p-6">
               {error && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-accessible-base mb-4">
+                <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-base mb-4">
                   {error}
                 </div>
               )}
@@ -174,17 +174,17 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
               {hasApplied ? (
                 <div className="text-center py-6">
                   <div className="text-4xl mb-4">✅</div>
-                  <p className="text-accessible-lg font-bold mb-2">
+                  <p className="text-lg font-bold mb-2">
                     지원이 완료되었습니다!
                   </p>
-                  <p className="text-accessible-base text-muted-foreground">
+                  <p className="text-base text-muted-foreground">
                     보호자의 연락을 기다려주세요.
                   </p>
                 </div>
               ) : showApplyForm ? (
                 <div className="space-y-4">
                   <div>
-                    <p className="text-accessible-base font-bold mb-2">
+                    <p className="text-base font-bold mb-2">
                       지원 메시지 (선택)
                     </p>
                     <Textarea
@@ -197,7 +197,7 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
                   <div className="flex gap-4">
                     <Button
                       variant="outline"
-                      size="xl"
+                      size="lg"
                       className="flex-1"
                       onClick={() => setShowApplyForm(false)}
                     >
@@ -205,7 +205,7 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
                     </Button>
                     <Button
                       variant="caregiver"
-                      size="xl"
+                      size="lg"
                       className="flex-1"
                       onClick={handleApply}
                       disabled={isApplying}
@@ -217,7 +217,7 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
               ) : (
                 <Button
                   variant="caregiver"
-                  size="xl"
+                  size="lg"
                   className="w-full"
                   onClick={() => setShowApplyForm(true)}
                 >
@@ -231,12 +231,12 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
         {!session && (
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-accessible-base text-muted-foreground mb-4">
+              <p className="text-base text-muted-foreground mb-4">
                 지원하려면 로그인이 필요합니다.
               </p>
               <Button
                 variant="caregiver"
-                size="xl"
+                size="lg"
                 onClick={() => router.push('/auth/login')}
               >
                 로그인하기

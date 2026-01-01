@@ -47,10 +47,10 @@ const WriteReviewPage: NextPage<Props> = ({ job, reviewee, alreadyReviewed }) =>
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">✅</div>
-              <h2 className="text-accessible-xl font-bold mb-4">
+              <h2 className="text-xl font-bold mb-4">
                 이미 리뷰를 작성하셨습니다
               </h2>
-              <p className="text-accessible-base text-muted-foreground mb-6">
+              <p className="text-base text-muted-foreground mb-6">
                 이 일자리에 대해 이미 리뷰를 작성하셨습니다.
               </p>
               <Button
@@ -74,10 +74,10 @@ const WriteReviewPage: NextPage<Props> = ({ job, reviewee, alreadyReviewed }) =>
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">🎉</div>
-              <h2 className="text-accessible-xl font-bold mb-4">
+              <h2 className="text-xl font-bold mb-4">
                 리뷰가 작성되었습니다
               </h2>
-              <p className="text-accessible-base text-muted-foreground mb-6">
+              <p className="text-base text-muted-foreground mb-6">
                 소중한 리뷰 감사합니다. 작성하신 리뷰는 다른 사용자에게 큰 도움이 됩니다.
               </p>
               <div className="flex justify-center gap-4">
@@ -109,11 +109,11 @@ const WriteReviewPage: NextPage<Props> = ({ job, reviewee, alreadyReviewed }) =>
         {/* 일자리 정보 */}
         <Card className="mb-6">
           <CardContent className="p-5">
-            <p className="text-accessible-sm text-muted-foreground mb-1">
+            <p className="text-sm text-muted-foreground mb-1">
               완료된 일자리
             </p>
-            <h2 className="text-accessible-lg font-bold">{job.title}</h2>
-            <p className="text-accessible-base text-muted-foreground mt-1">
+            <h2 className="text-lg font-bold">{job.title}</h2>
+            <p className="text-base text-muted-foreground mt-1">
               📍 {job.location}
             </p>
           </CardContent>

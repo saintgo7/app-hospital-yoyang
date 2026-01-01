@@ -7,22 +7,14 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
-      // 고령자 친화적 폰트 크기
-      fontSize: {
-        'accessible-sm': ['16px', { lineHeight: '1.5' }],
-        'accessible-base': ['18px', { lineHeight: '1.6' }],
-        'accessible-lg': ['20px', { lineHeight: '1.6' }],
-        'accessible-xl': ['24px', { lineHeight: '1.5' }],
-        'accessible-2xl': ['28px', { lineHeight: '1.4' }],
-        'accessible-3xl': ['32px', { lineHeight: '1.3' }],
-      },
-      // 터치 친화적 간격
-      spacing: {
-        'touch-min': '48px',
-        'touch-comfortable': '56px',
-      },
-      // 색상 (CSS 변수 기반)
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -32,16 +24,6 @@ const config: Config = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -67,29 +49,47 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // 역할별 색상
+        // 역할별 색상 (CSS 변수 기반)
         caregiver: {
-          light: '#ecfdf5',
-          DEFAULT: '#10b981',
-          dark: '#059669',
+          DEFAULT: 'hsl(var(--caregiver))',
+          foreground: 'hsl(var(--caregiver-foreground))',
         },
         guardian: {
-          light: '#fef3c7',
-          DEFAULT: '#f59e0b',
-          dark: '#d97706',
+          DEFAULT: 'hsl(var(--guardian))',
+          foreground: 'hsl(var(--guardian-foreground))',
+        },
+        // 상태 색상
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
         },
       },
-      // 둥근 모서리
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        xl: '16px',
-        '2xl': '20px',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 }
 
 export default config

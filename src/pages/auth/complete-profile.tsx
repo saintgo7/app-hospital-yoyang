@@ -65,8 +65,8 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
       <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-lg">
           <CardHeader className="text-center space-y-4">
-            <CardTitle className="text-accessible-2xl">프로필 완성하기</CardTitle>
-            <CardDescription className="text-accessible-base">
+            <CardTitle className="text-2xl">프로필 완성하기</CardTitle>
+            <CardDescription className="text-base">
               서비스 이용을 위해 추가 정보를 입력해주세요
             </CardDescription>
           </CardHeader>
@@ -74,40 +74,40 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-accessible-base">
+                <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-base">
                   {error}
                 </div>
               )}
 
               {/* 역할 선택 */}
               <div className="space-y-3">
-                <Label className="text-accessible-base" required>
+                <Label className="text-base" required>
                   이용 유형
                 </Label>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, role: 'guardian' })}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-4 rounded-lg border-2 transition-all ${
                       formData.role === 'guardian'
                         ? 'border-guardian bg-guardian/10'
                         : 'border-muted'
                     }`}
                   >
                     <div className="text-2xl mb-2">👨‍👩‍👧</div>
-                    <div className="text-accessible-base font-bold">보호자</div>
+                    <div className="text-base font-bold">보호자</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, role: 'caregiver' })}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-4 rounded-lg border-2 transition-all ${
                       formData.role === 'caregiver'
                         ? 'border-caregiver bg-caregiver/10'
                         : 'border-muted'
                     }`}
                   >
                     <div className="text-2xl mb-2">💪</div>
-                    <div className="text-accessible-base font-bold">간병인</div>
+                    <div className="text-base font-bold">간병인</div>
                   </button>
                 </div>
               </div>
@@ -139,7 +139,7 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
                   placeholder="010-0000-0000"
                   required
                 />
-                <p className="text-accessible-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   카카오 알림톡 수신에 사용됩니다
                 </p>
               </div>
@@ -160,7 +160,7 @@ const CompleteProfilePage: NextPage<Props> = ({ email, name, image, initialRole 
 
               <Button
                 type="submit"
-                size="xl"
+                size="lg"
                 className="w-full"
                 disabled={isSubmitting}
               >

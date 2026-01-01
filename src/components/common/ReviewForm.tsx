@@ -48,7 +48,7 @@ export const ReviewForm: FC<ReviewFormProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-accessible-lg">
+        <CardTitle className="text-lg">
           {revieweeName}님에게 리뷰 작성
         </CardTitle>
       </CardHeader>
@@ -56,7 +56,7 @@ export const ReviewForm: FC<ReviewFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 별점 선택 */}
           <div>
-            <label className="block text-accessible-base font-medium mb-3">
+            <label className="block text-base font-medium mb-3">
               평점을 선택해주세요
             </label>
             <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export const ReviewForm: FC<ReviewFormProps> = ({
                 </button>
               ))}
               {rating > 0 && (
-                <span className="ml-3 text-accessible-base text-muted-foreground">
+                <span className="ml-3 text-base text-muted-foreground">
                   {ratingLabels[rating]}
                 </span>
               )}
@@ -100,7 +100,7 @@ export const ReviewForm: FC<ReviewFormProps> = ({
           <div>
             <label
               htmlFor="comment"
-              className="block text-accessible-base font-medium mb-2"
+              className="block text-base font-medium mb-2"
             >
               리뷰 내용 (선택)
             </label>
@@ -109,17 +109,17 @@ export const ReviewForm: FC<ReviewFormProps> = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="간병 서비스에 대한 경험을 자유롭게 작성해주세요."
-              className="min-h-[120px] text-accessible-base"
+              className="min-h-[120px] text-base"
               maxLength={500}
             />
-            <p className="mt-1 text-accessible-sm text-muted-foreground text-right">
+            <p className="mt-1 text-sm text-muted-foreground text-right">
               {comment.length}/500
             </p>
           </div>
 
           {/* 에러 메시지 */}
           {error && (
-            <div className="p-4 bg-destructive/10 text-destructive rounded-xl text-accessible-base">
+            <div className="p-4 bg-destructive/10 text-destructive rounded-lg text-base">
               {error}
             </div>
           )}

@@ -29,8 +29,8 @@ const RegisterPage: NextPage = () => {
       <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-80px)]">
         <Card className="w-full max-w-lg">
           <CardHeader className="text-center space-y-4">
-            <CardTitle className="text-accessible-2xl">회원가입</CardTitle>
-            <CardDescription className="text-accessible-base">
+            <CardTitle className="text-2xl">회원가입</CardTitle>
+            <CardDescription className="text-base">
               케어매치와 함께 시작하세요
             </CardDescription>
           </CardHeader>
@@ -38,7 +38,7 @@ const RegisterPage: NextPage = () => {
           <CardContent className="space-y-8">
             {/* 역할 선택 */}
             <div className="space-y-4">
-              <h3 className="text-accessible-lg font-bold text-center">
+              <h3 className="text-lg font-bold text-center">
                 어떤 서비스를 이용하시겠어요?
               </h3>
 
@@ -52,8 +52,8 @@ const RegisterPage: NextPage = () => {
                   }`}
                 >
                   <div className="text-4xl mb-3">👨‍👩‍👧</div>
-                  <div className="text-accessible-lg font-bold">보호자</div>
-                  <p className="text-accessible-sm text-muted-foreground mt-2">
+                  <div className="text-lg font-bold">보호자</div>
+                  <p className="text-sm text-muted-foreground mt-2">
                     간병인을 찾고 있어요
                   </p>
                 </button>
@@ -67,8 +67,8 @@ const RegisterPage: NextPage = () => {
                   }`}
                 >
                   <div className="text-4xl mb-3">💪</div>
-                  <div className="text-accessible-lg font-bold">간병인</div>
-                  <p className="text-accessible-sm text-muted-foreground mt-2">
+                  <div className="text-lg font-bold">간병인</div>
+                  <p className="text-sm text-muted-foreground mt-2">
                     일자리를 찾고 있어요
                   </p>
                 </button>
@@ -82,7 +82,7 @@ const RegisterPage: NextPage = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t" />
                   </div>
-                  <div className="relative flex justify-center text-accessible-sm">
+                  <div className="relative flex justify-center text-sm">
                     <span className="bg-card px-4 text-muted-foreground">
                       간편 가입
                     </span>
@@ -91,7 +91,7 @@ const RegisterPage: NextPage = () => {
 
                 <Button
                   onClick={() => handleSocialLogin('kakao')}
-                  size="xl"
+                  size="lg"
                   className="w-full bg-[#FEE500] hover:bg-[#FDD835] text-[#191919] font-bold gap-3"
                 >
                   <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
@@ -102,7 +102,7 @@ const RegisterPage: NextPage = () => {
 
                 <Button
                   onClick={() => handleSocialLogin('naver')}
-                  size="xl"
+                  size="lg"
                   className="w-full bg-[#03C75A] hover:bg-[#02b350] text-white font-bold gap-3"
                 >
                   <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
@@ -113,7 +113,7 @@ const RegisterPage: NextPage = () => {
               </div>
             )}
 
-            <div className="text-center text-accessible-base text-muted-foreground">
+            <div className="text-center text-base text-muted-foreground">
               <p>
                 이미 계정이 있으신가요?{' '}
                 <button

@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-3 py-1 text-accessible-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
@@ -14,14 +14,16 @@ const badgeVariants = cva(
         destructive:
           'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
         outline: 'text-foreground',
+        // 역할별 배지
         caregiver:
-          'border-transparent bg-caregiver-light text-caregiver-dark',
+          'border-transparent bg-caregiver/10 text-caregiver',
         guardian:
-          'border-transparent bg-guardian-light text-guardian-dark',
+          'border-transparent bg-warning/10 text-warning',
+        // 상태 배지
         success:
-          'border-transparent bg-green-100 text-green-800',
+          'border-transparent bg-success/10 text-success',
         warning:
-          'border-transparent bg-yellow-100 text-yellow-800',
+          'border-transparent bg-warning/10 text-warning',
       },
     },
     defaultVariants: {

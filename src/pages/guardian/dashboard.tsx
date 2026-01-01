@@ -34,10 +34,10 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
       <div className="container mx-auto px-4 py-8">
         {/* 환영 메시지 */}
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">
+          <h1 className="text-2xl font-bold mb-2">
             안녕하세요, {user.name}님! 👋
           </h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             좋은 간병인을 찾으실 수 있도록 도와드릴게요.
           </p>
         </div>
@@ -74,7 +74,7 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
         {/* 내 구인글 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-accessible-lg">내 구인글</CardTitle>
+            <CardTitle className="text-lg">내 구인글</CardTitle>
             <Link href="/guardian/jobs">
               <Button variant="ghost" size="sm">
                 전체보기
@@ -85,7 +85,7 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
             {jobs.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-4xl mb-4">📝</div>
-                <p className="text-accessible-base text-muted-foreground mb-4">
+                <p className="text-base text-muted-foreground mb-4">
                   아직 등록한 구인글이 없습니다.
                 </p>
                 <Link href="/guardian/jobs/new">
@@ -131,8 +131,8 @@ function StatCard({
       <CardContent className="p-6 flex items-center gap-4">
         <div className="text-4xl">{icon}</div>
         <div>
-          <p className="text-accessible-sm text-muted-foreground">{title}</p>
-          <p className="text-accessible-2xl font-bold">{value}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -160,7 +160,7 @@ function QuickMenu({
       >
         <CardContent className="p-6 text-center">
           <div className="text-3xl mb-2">{icon}</div>
-          <p className={`text-accessible-base font-medium ${primary ? 'text-guardian-dark' : ''}`}>
+          <p className={`text-base font-medium ${primary ? 'text-guardian-dark' : ''}`}>
             {label}
           </p>
         </CardContent>
@@ -189,15 +189,15 @@ function JobCard({ job }: { job: JobWithApplications }) {
 
   return (
     <Link href={`/guardian/jobs/${job.id}`}>
-      <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/50 transition-colors cursor-pointer">
+      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
-            <h4 className="text-accessible-base font-bold">{job.title}</h4>
+            <h4 className="text-base font-bold">{job.title}</h4>
             <Badge variant={statusVariants[job.status]}>
               {statusLabels[job.status]}
             </Badge>
           </div>
-          <p className="text-accessible-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {job.location} · {formatCurrency(job.hourly_rate)}/시간
           </p>
         </div>
@@ -208,7 +208,7 @@ function JobCard({ job }: { job: JobWithApplications }) {
               새 지원 {pendingCount}건
             </Badge>
           )}
-          <p className="text-accessible-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {getTimeAgo(job.created_at)}
           </p>
         </div>

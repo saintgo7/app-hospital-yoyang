@@ -60,8 +60,8 @@ const CaregiverApplicationsPage: NextPage<Props> = ({ applications: initialAppli
     <Layout title="지원 현황">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">지원 현황</h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <h1 className="text-2xl font-bold mb-2">지원 현황</h1>
+          <p className="text-base text-muted-foreground">
             총 {applications.length}건의 지원 내역
           </p>
         </div>
@@ -72,7 +72,7 @@ const CaregiverApplicationsPage: NextPage<Props> = ({ applications: initialAppli
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-xl text-accessible-base transition-all ${
+              className={`px-4 py-2 rounded-lg text-base transition-all ${
                 filter === status
                   ? 'bg-primary text-primary-foreground font-bold'
                   : 'bg-muted hover:bg-muted/80'
@@ -91,7 +91,7 @@ const CaregiverApplicationsPage: NextPage<Props> = ({ applications: initialAppli
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">📭</div>
-              <p className="text-accessible-lg text-muted-foreground mb-4">
+              <p className="text-lg text-muted-foreground mb-4">
                 {filter === 'all'
                   ? '아직 지원한 일자리가 없습니다.'
                   : '해당 상태의 지원 내역이 없습니다.'}
@@ -147,7 +147,7 @@ function ApplicationCard({
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <Link href={`/jobs/${job.id}`}>
-                <h3 className="text-accessible-lg font-bold hover:text-primary transition-colors">
+                <h3 className="text-lg font-bold hover:text-primary transition-colors">
                   {job.title}
                 </h3>
               </Link>
@@ -156,17 +156,17 @@ function ApplicationCard({
               </Badge>
             </div>
 
-            <div className="space-y-2 text-accessible-base text-muted-foreground">
+            <div className="space-y-2 text-base text-muted-foreground">
               <p>📍 {job.location}</p>
               <p>💰 {formatCurrency(job.hourly_rate)}/시간</p>
               <p>👤 {job.guardian.name} 보호자님</p>
-              <p className="text-accessible-sm">지원일: {getTimeAgo(application.created_at)}</p>
+              <p className="text-sm">지원일: {getTimeAgo(application.created_at)}</p>
             </div>
 
             {application.message && (
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                <p className="text-accessible-sm text-muted-foreground">지원 메시지:</p>
-                <p className="text-accessible-base">{application.message}</p>
+                <p className="text-sm text-muted-foreground">지원 메시지:</p>
+                <p className="text-base">{application.message}</p>
               </div>
             )}
           </div>

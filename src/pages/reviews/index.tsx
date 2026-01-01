@@ -39,8 +39,8 @@ const ReviewsPage: NextPage<Props> = ({
     <Layout title="리뷰">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-accessible-2xl font-bold mb-2">리뷰</h1>
-          <p className="text-accessible-base text-muted-foreground">
+          <h1 className="text-2xl font-bold mb-2">리뷰</h1>
+          <p className="text-base text-muted-foreground">
             {role === 'caregiver'
               ? '보호자로부터 받은 리뷰와 내가 작성한 리뷰를 확인하세요.'
               : '간병인에게 작성한 리뷰와 받은 리뷰를 확인하세요.'}
@@ -61,7 +61,7 @@ const ReviewsPage: NextPage<Props> = ({
         <div className="flex gap-3 mb-8">
           <button
             onClick={() => setActiveTab('received')}
-            className={`px-6 py-3 rounded-xl text-accessible-base transition-all ${
+            className={`px-6 py-3 rounded-lg text-base transition-all ${
               activeTab === 'received'
                 ? 'bg-primary text-primary-foreground font-bold'
                 : 'bg-muted hover:bg-muted/80'
@@ -71,7 +71,7 @@ const ReviewsPage: NextPage<Props> = ({
           </button>
           <button
             onClick={() => setActiveTab('given')}
-            className={`px-6 py-3 rounded-xl text-accessible-base transition-all ${
+            className={`px-6 py-3 rounded-lg text-base transition-all ${
               activeTab === 'given'
                 ? 'bg-primary text-primary-foreground font-bold'
                 : 'bg-muted hover:bg-muted/80'
@@ -88,13 +88,13 @@ const ReviewsPage: NextPage<Props> = ({
               <div className="text-5xl mb-4">
                 {activeTab === 'received' ? '📭' : '📝'}
               </div>
-              <p className="text-accessible-lg text-muted-foreground mb-4">
+              <p className="text-lg text-muted-foreground mb-4">
                 {activeTab === 'received'
                   ? '아직 받은 리뷰가 없습니다.'
                   : '아직 작성한 리뷰가 없습니다.'}
               </p>
               {activeTab === 'received' && (
-                <p className="text-accessible-base text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {role === 'caregiver'
                     ? '일자리를 완료하면 보호자로부터 리뷰를 받을 수 있습니다.'
                     : '간병 서비스 이용 후 리뷰를 받을 수 있습니다.'}
