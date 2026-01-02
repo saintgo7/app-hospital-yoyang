@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "carematch-v3",
   "framework": "nextjs",
   "regions": ["icn1"],
   "installCommand": "pnpm install",
