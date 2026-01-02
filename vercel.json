@@ -2,12 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "regions": ["icn1"],
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build",
   "functions": {
-    "src/pages/api/**/*.ts": {
+    "api/**/*.ts": {
       "maxDuration": 30
     }
   },
-  "crons": [],
   "headers": [
     {
       "source": "/(.*)",
@@ -22,7 +23,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [],
-  "redirects": []
+  ]
 }
