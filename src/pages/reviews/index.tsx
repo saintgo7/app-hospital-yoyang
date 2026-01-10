@@ -86,7 +86,7 @@ const ReviewsPage: NextPage<Props> = ({
           <Card>
             <CardContent className="py-16 text-center">
               <div className="text-5xl mb-4">
-                {activeTab === 'received' ? '📭' : '[N]'}
+                {activeTab === 'received' ? '[empty]' : '[N]'}
               </div>
               <p className="text-lg text-muted-foreground mb-4">
                 {activeTab === 'received'

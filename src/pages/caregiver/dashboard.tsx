@@ -31,7 +31,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
         {/* 환영 메시지 */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">
-            안녕하세요, {user.name}님! 👋
+            안녕하세요, {user.name}님! [wave]
           </h1>
           <p className="text-base text-muted-foreground">
             오늘도 좋은 하루 되세요.
@@ -69,7 +69,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
           <StatCard
             title="대기 중"
             value={stats.pendingApplications}
-            icon="⏳"
+            icon="[wait]"
             variant="warning"
           />
           <StatCard
@@ -101,7 +101,7 @@ const CaregiverDashboard: NextPage<Props> = ({ user, profile, applications, stat
           <CardContent>
             {applications.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-4xl mb-4">📭</div>
+                <div className="text-4xl mb-4">[empty]</div>
                 <p className="text-base text-muted-foreground mb-4">
                   아직 지원한 일자리가 없습니다.
                 </p>

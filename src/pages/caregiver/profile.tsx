@@ -153,7 +153,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                         : 'border-muted'
                     }`}
                   >
-                    🟢 구직 중
+                    [active] 구직 중
                   </button>
                   <button
                     type="button"
@@ -164,7 +164,7 @@ const CaregiverProfilePage: NextPage<Props> = ({ user, profile: initialProfile }
                         : 'border-muted'
                     }`}
                   >
-                    ⚪ 구직 완료
+                    [inactive] 구직 완료
                   </button>
                 </div>
               </div>

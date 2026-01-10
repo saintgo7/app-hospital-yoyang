@@ -213,7 +213,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
               <CardContent>
                 {applications.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="text-4xl mb-4">📭</div>
+                    <div className="text-4xl mb-4">[empty]</div>
                     <p className="text-base text-muted-foreground">
                       아직 지원자가 없습니다.
                     </p>
@@ -224,7 +224,7 @@ const GuardianJobDetailPage: NextPage<Props> = ({ job, applications: initialAppl
                     {pendingApplications.length > 0 && (
                       <div>
                         <h4 className="text-base font-bold mb-4 flex items-center gap-2">
-                          ⏳ 대기 중 ({pendingApplications.length}명)
+                          [wait] 대기 중 ({pendingApplications.length}명)
                         </h4>
                         <div className="space-y-4">
                           {pendingApplications.map((app) => (

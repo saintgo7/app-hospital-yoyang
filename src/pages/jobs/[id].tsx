@@ -100,11 +100,11 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
                 <span>{job.location}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl"></span>
+                <span className="text-xl">[care]</span>
                 <span>{job.care_type}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl"></span>
+                <span className="text-xl">[D]</span>
                 <span>{formatDate(job.start_date)} 시작</span>
               </div>
               <div className="flex items-center gap-2">
@@ -132,14 +132,14 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
                 </p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-2xl mb-1">{patientInfo?.gender === '여성' ? '' : ''}</p>
+                <p className="text-2xl mb-1">{patientInfo?.gender === '여성' ? '[F]' : '[M]'}</p>
                 <p className="text-sm text-muted-foreground">성별</p>
                 <p className="text-lg font-bold">
                   {patientInfo?.gender || '-'}
                 </p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-2xl mb-1"></p>
+                <p className="text-2xl mb-1">[S]</p>
                 <p className="text-sm text-muted-foreground">상태</p>
                 <p className="text-lg font-bold">
                   {patientInfo?.condition || '-'}

@@ -35,7 +35,7 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
         {/* 환영 메시지 */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">
-            안녕하세요, {user.name}님! 👋
+            안녕하세요, {user.name}님! [wave]
           </h1>
           <p className="text-base text-muted-foreground">
             좋은 간병인을 찾으실 수 있도록 도와드릴게요.
@@ -52,22 +52,22 @@ const GuardianDashboard: NextPage<Props> = ({ user, jobs, stats }) => {
           <StatCard
             title="모집 중"
             value={stats.openJobs}
-            icon=""
+            icon="[recruit]"
             variant="caregiver"
           />
           <StatCard
             title="받은 지원"
             value={stats.totalApplications}
-            icon="📨"
+            icon="[mail]"
             variant="guardian"
           />
         </div>
 
         {/* 빠른 메뉴 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <QuickMenu href="/guardian/jobs/new" icon="" label="구인글 작성" primary />
+          <QuickMenu href="/guardian/jobs/new" icon="[+]" label="구인글 작성" primary />
           <QuickMenu href="/guardian/jobs" icon="[#]" label="내 구인글" />
-          <QuickMenu href="/caregivers" icon="" label="간병인 찾기" />
+          <QuickMenu href="/caregivers" icon="[search]" label="간병인 찾기" />
           <QuickMenu href="/chat" icon="[...]" label="채팅" />
         </div>
 

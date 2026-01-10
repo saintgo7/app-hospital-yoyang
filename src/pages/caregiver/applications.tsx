@@ -90,7 +90,7 @@ const CaregiverApplicationsPage: NextPage<Props> = ({ applications: initialAppli
         {filteredApplications.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <div className="text-5xl mb-4">📭</div>
+              <div className="text-5xl mb-4">[empty]</div>
               <p className="text-lg text-muted-foreground mb-4">
                 {filter === 'all'
                   ? '아직 지원한 일자리가 없습니다.'
@@ -132,7 +132,7 @@ function ApplicationCard({
   isCancelling: boolean
 }) {
   const statusConfig = {
-    pending: { label: '검토 중', variant: 'warning' as const, icon: '⏳' },
+    pending: { label: '검토 중', variant: 'warning' as const, icon: '[wait]' },
     accepted: { label: '수락됨', variant: 'success' as const, icon: '[v]' },
     rejected: { label: '거절됨', variant: 'destructive' as const, icon: 'X' },
   }

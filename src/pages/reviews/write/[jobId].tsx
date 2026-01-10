@@ -73,7 +73,7 @@ const WriteReviewPage: NextPage<Props> = ({ job, reviewee, alreadyReviewed }) =>
         <div className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="py-16 text-center">
-              <div className="text-5xl mb-4"></div>
+              <div className="text-5xl mb-4">[v]</div>
               <h2 className="text-xl font-bold mb-4">
                 리뷰가 작성되었습니다
               </h2>
