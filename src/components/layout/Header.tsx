@@ -1,18 +1,30 @@
-import { type FC } from 'react'
+import { type FC, useState } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Menu, X } from 'lucide-react'
 
 /**
  * 헤더 컴포넌트
  */
 export const Header: FC = () => {
   const { data: session, status } = useSession()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4 md:h-16">
+        {/* 햄버거 메뉴 버튼 (모바일) */}
+        <button
+          className="md:hidden p-2 -ml-2 hover:bg-accent rounded-md"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
         {/* 로고 */}
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-xl font-bold text-primary">케어매치</span>
@@ -75,6 +87,41 @@ export const Header: FC = () => {
           )}
         </div>
       </div>
+
+      {/* 모바일 메뉴 패널 */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t bg-background">
+          <nav className="container px-4 py-4 flex flex-col space-y-4">
+            <Link
+              href="/jobs"
+              className="text-lg font-medium py-3 px-4 hover:bg-accent rounded-lg transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              구인 정보
+            </Link>
+            <Link
+              href="/caregivers"
+              className="text-lg font-medium py-3 px-4 hover:bg-accent rounded-lg transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              간병인 찾기
+            </Link>
+            {session && (
+              <>
+                <div className="border-t pt-4 mt-2">
+                  <Link
+                    href="/dashboard"
+                    className="text-lg font-medium py-3 px-4 hover:bg-accent rounded-lg transition-colors block"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    내 대시보드
+                  </Link>
+                </div>
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   )
 }
