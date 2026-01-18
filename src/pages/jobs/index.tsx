@@ -1,8 +1,8 @@
 import type { NextPage, GetServerSideProps } from 'next'
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { Layout } from '@/components/layout'
+import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,20 +22,25 @@ interface Props {
 
 const JobsPage: NextPage<Props> = ({ jobs: initialJobs, locations }) => {
   const { data: session } = useSession()
-  const [jobs, setJobs] = useState(initialJobs)
+  const [jobs] = useState(initialJobs)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
 
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch =
-      !searchQuery ||
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Use useMemo to optimize filtering performance
+  const filteredJobs = useMemo(() => {
+    const lowerQuery = searchQuery.toLowerCase()
 
-    const matchesLocation = !selectedLocation || job.location.includes(selectedLocation)
+    return jobs.filter((job) => {
+      const matchesSearch =
+        !searchQuery ||
+        job.title.toLowerCase().includes(lowerQuery) ||
+        job.description.toLowerCase().includes(lowerQuery)
 
-    return matchesSearch && matchesLocation
-  })
+      const matchesLocation = !selectedLocation || job.location.includes(selectedLocation)
+
+      return matchesSearch && matchesLocation
+    })
+  }, [jobs, searchQuery, selectedLocation])
 
   return (
     <Layout title="구인 정보">
@@ -104,7 +109,8 @@ const JobsPage: NextPage<Props> = ({ jobs: initialJobs, locations }) => {
   )
 }
 
-function JobCard({
+// Memoize JobCard to prevent unnecessary re-renders
+const JobCard = memo(function JobCard({
   job,
   isCaregiver,
 }: {
@@ -158,7 +164,7 @@ function JobCard({
       </Card>
     </Link>
   )
-}
+})
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const supabase = createServerClient()

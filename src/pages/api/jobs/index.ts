@@ -7,12 +7,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getServerSession(req, res, authOptions)
+  // Start session promise early (async-api-routes pattern)
+  const sessionPromise = getServerSession(req, res, authOptions)
 
   switch (req.method) {
     case 'GET':
       return handleGet(req, res)
     case 'POST':
+      // Await session only when needed
+      const session = await sessionPromise
       if (!session?.user) {
         return res.status(401).json({ error: '로그인이 필요합니다.' })
       }

@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Link from 'next/link'
-import { Layout } from '@/components/layout'
+import { memo } from 'react'
+import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
 
 const Home: NextPage = () => {
@@ -99,8 +100,8 @@ const Home: NextPage = () => {
   )
 }
 
-// 특징 카드 컴포넌트
-function FeatureCard({
+// 특징 카드 컴포넌트 (Memoized for re-render optimization)
+const FeatureCard = memo(function FeatureCard({
   icon,
   title,
   description,
@@ -116,16 +117,22 @@ function FeatureCard({
       <p className="text-base text-muted-foreground">{description}</p>
     </div>
   )
-}
+})
 
-// 통계 카드 컴포넌트
-function StatCard({ value, label }: { value: string; label: string }) {
+// 통계 카드 컴포넌트 (Memoized for re-render optimization)
+const StatCard = memo(function StatCard({
+  value,
+  label
+}: {
+  value: string
+  label: string
+}) {
   return (
     <div>
       <div className="text-2xl md:text-3xl font-bold text-primary">{value}</div>
       <div className="text-base text-muted-foreground mt-2">{label}</div>
     </div>
   )
-}
+})
 
 export default Home
