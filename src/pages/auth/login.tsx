@@ -1,25 +1,11 @@
-import type { NextPage } from 'next'
-import { signIn } from 'next-auth/react'
+import type { NextPage, GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { Layout } from '@/components/layout'
+import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 const LoginPage: NextPage = () => {
   const router = useRouter()
-  const { callbackUrl, error } = router.query
-
-  const handleKakaoLogin = () => {
-    signIn('kakao', {
-      callbackUrl: (callbackUrl as string) || '/dashboard',
-    })
-  }
-
-  const handleNaverLogin = () => {
-    signIn('naver', {
-      callbackUrl: (callbackUrl as string) || '/dashboard',
-    })
-  }
 
   return (
     <Layout title="로그인" hideFooter>
@@ -33,54 +19,36 @@ const LoginPage: NextPage = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {error && (
-              <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm text-center">
-                {error === 'OAuthAccountNotLinked'
-                  ? '이미 다른 방법으로 가입된 이메일입니다.'
-                  : '로그인 중 오류가 발생했습니다. 다시 시도해주세요.'}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <Button
-                onClick={handleKakaoLogin}
-                size="lg"
-                className="w-full bg-[#FEE500] hover:bg-[#FDD835] text-[#191919] font-bold gap-3"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                  <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.833 1.857 5.315 4.656 6.745-.147.544-.535 1.975-.613 2.283-.097.385.141.38.297.277.123-.081 1.956-1.327 2.755-1.87.602.088 1.223.134 1.856.134 5.523 0 10-3.582 10-8s-4.477-8-10-8z" />
-                </svg>
-                카카오로 로그인
-              </Button>
-
-              <Button
-                onClick={handleNaverLogin}
-                size="lg"
-                className="w-full bg-[#03C75A] hover:bg-[#02b350] text-white font-bold gap-3"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                  <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z" />
-                </svg>
-                네이버로 로그인
-              </Button>
-            </div>
-
-            <div className="text-center text-sm text-muted-foreground">
-              <p>
-                아직 계정이 없으신가요?{' '}
-                <button
-                  onClick={() => router.push('/auth/register')}
-                  className="text-primary hover:underline font-medium"
-                >
-                  회원가입
-                </button>
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4">🚧</div>
+              <p className="text-lg text-muted-foreground mb-2">
+                로그인 기능 준비중입니다
+              </p>
+              <p className="text-sm text-muted-foreground">
+                빠른 시일 내에 서비스를 제공하겠습니다
               </p>
             </div>
+
+            <Button
+              onClick={() => router.push('/')}
+              size="lg"
+              className="w-full"
+              variant="outline"
+            >
+              홈으로 돌아가기
+            </Button>
           </CardContent>
         </Card>
       </div>
     </Layout>
   )
+}
+
+// Force SSR to support useRouter
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    props: {},
+  }
 }
 
 export default LoginPage
