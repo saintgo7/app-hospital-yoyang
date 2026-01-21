@@ -3,17 +3,29 @@ import KakaoProvider from 'next-auth/providers/kakao'
 import NaverProvider from 'next-auth/providers/naver'
 import { createServerClient } from '@/lib/supabase'
 
-export const authOptions: NextAuthOptions = {
-  providers: [
+// Build providers array only if credentials are configured
+const providers = []
+
+if (process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET) {
+  providers.push(
     KakaoProvider({
-      clientId: process.env.KAKAO_CLIENT_ID!,
-      clientSecret: process.env.KAKAO_CLIENT_SECRET!,
-    }),
+      clientId: process.env.KAKAO_CLIENT_ID,
+      clientSecret: process.env.KAKAO_CLIENT_SECRET,
+    })
+  )
+}
+
+if (process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET) {
+  providers.push(
     NaverProvider({
-      clientId: process.env.NAVER_CLIENT_ID!,
-      clientSecret: process.env.NAVER_CLIENT_SECRET!,
-    }),
-  ],
+      clientId: process.env.NAVER_CLIENT_ID,
+      clientSecret: process.env.NAVER_CLIENT_SECRET,
+    })
+  )
+}
+
+export const authOptions: NextAuthOptions = {
+  providers,
   pages: {
     signIn: '/auth/login',
     error: '/auth/error',
@@ -88,7 +100,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30일
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'temporary-secret-for-development',
 }
 
 export default NextAuth(authOptions)
