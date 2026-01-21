@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 /**
  * Supabase 클라이언트 (클라이언트 사이드용)
@@ -27,10 +27,13 @@ export function createBrowserClient() {
 /**
  * Supabase 서버 클라이언트 생성
  * @description API 라우트에서 사용하는 서버용 클라이언트
+ * @note Falls back to anon key if service role key is not set
  */
 export function createServerClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient<Database>(supabaseUrl, serviceRoleKey, {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const key = serviceRoleKey || supabaseAnonKey
+
+  return createClient<Database>(supabaseUrl, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
