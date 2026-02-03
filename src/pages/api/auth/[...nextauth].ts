@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import KakaoProvider from 'next-auth/providers/kakao'
 import NaverProvider from 'next-auth/providers/naver'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 // Build providers array only if credentials are configured
 const providers = []
@@ -32,19 +32,16 @@ export const authOptions: NextAuthOptions = {
     newUser: '/auth/complete-profile',
   },
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       if (!user.email) return false
 
-      const supabase = createServerClient()
+      // 사용자 존재 여부 확인 (PostgreSQL 직접 쿼리)
+      const result = await query<{ id: string; role: string }>(
+        'SELECT id, role FROM users WHERE email = $1',
+        [user.email]
+      )
 
-      // 사용자 존재 여부 확인
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id, role')
-        .eq('email', user.email)
-        .single()
-
-      if (!existingUser) {
+      if (result.rows.length === 0) {
         // 신규 사용자 - 프로필 완성 페이지로 리다이렉트
         return true
       }
@@ -52,36 +49,40 @@ export const authOptions: NextAuthOptions = {
       return true
     },
     async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id
-      }
+      // 초기 로그인 시 user 정보를 token에 저장
+      if (user && user.email) {
+        const result = await query<{
+          id: string
+          role: string
+          phone: string | null
+          name: string
+        }>(
+          'SELECT id, role, phone, name FROM users WHERE email = $1',
+          [user.email]
+        )
 
-      if (account?.provider && token.email) {
-        const supabase = createServerClient()
-        const { data: dbUser } = await supabase
-          .from('users')
-          .select('id, role, phone')
-          .eq('email', token.email)
-          .single()
-
-        if (dbUser) {
+        if (result.rows.length > 0) {
+          const dbUser = result.rows[0]
           token.id = dbUser.id
-          token.role = dbUser.role
+          token.role = dbUser.role as 'caregiver' | 'guardian'
           token.phone = dbUser.phone || undefined
-          token.isProfileComplete = true
+          token.name = dbUser.name
+          token.isProfileComplete = !!(dbUser.role && dbUser.phone)
         } else {
           token.isProfileComplete = false
         }
       }
-
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id
-        session.user.role = token.role
-        session.user.phone = token.phone
-        session.user.isProfileComplete = token.isProfileComplete
+      // JWT 토큰의 정보를 세션에 추가
+      if (session.user && token.id) {
+        const role = token.role as string
+        session.user.id = token.id as string
+        session.user.role = (role === 'caregiver' || role === 'guardian' ? role : 'guardian') as 'caregiver' | 'guardian'
+        session.user.phone = token.phone ? (token.phone as string) : undefined
+        session.user.name = token.name as string
+        session.user.isProfileComplete = token.isProfileComplete as boolean
       }
       return session
     },

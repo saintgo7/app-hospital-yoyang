@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -32,58 +32,77 @@ async function handleGet(
   roomId: string,
   userId: string
 ) {
-  const supabase = createServerClient()
-  const { before, limit = '50' } = req.query
+  const { before, after, limit = '50' } = req.query
 
-  // 채팅방 접근 권한 확인
-  const { data: room, error: roomError } = await supabase
-    .from('chat_rooms')
-    .select('id, caregiver_id, guardian_id')
-    .eq('id', roomId)
-    .single()
+  try {
+    // 채팅방 접근 권한 확인
+    const roomResult = await query<{
+      id: string
+      caregiver_id: string
+      guardian_id: string
+    }>(
+      'SELECT id, caregiver_id, guardian_id FROM chat_rooms WHERE id = $1',
+      [roomId]
+    )
 
-  if (roomError || !room) {
-    return res.status(404).json({ error: '채팅방을 찾을 수 없습니다.' })
-  }
+    if (roomResult.rows.length === 0) {
+      return res.status(404).json({ error: '채팅방을 찾을 수 없습니다.' })
+    }
 
-  if (room.caregiver_id !== userId && room.guardian_id !== userId) {
-    return res.status(403).json({ error: '접근 권한이 없습니다.' })
-  }
+    const room = roomResult.rows[0]
 
-  // 메시지 조회
-  let query = supabase
-    .from('messages')
-    .select(`
-      *,
-      sender:users!sender_id(id, name, avatar_url)
-    `)
-    .eq('room_id', roomId)
-    .order('created_at', { ascending: false })
-    .limit(parseInt(limit as string, 10))
+    if (room.caregiver_id !== userId && room.guardian_id !== userId) {
+      return res.status(403).json({ error: '접근 권한이 없습니다.' })
+    }
 
-  if (before) {
-    query = query.lt('created_at', before as string)
-  }
+    // 메시지 조회
+    const params: any[] = [roomId, parseInt(limit as string, 10)]
+    let timeCondition = ''
 
-  const { data: messages, error } = await query
+    if (before) {
+      params.push(before as string)
+      timeCondition = `AND m.created_at < $${params.length}`
+    } else if (after) {
+      params.push(after as string)
+      timeCondition = `AND m.created_at > $${params.length}`
+    }
 
-  if (error) {
+    const messagesResult = await query(
+      `SELECT
+        m.*,
+        json_build_object(
+          'id', u.id,
+          'name', u.name,
+          'avatar_url', u.avatar_url
+        ) as sender
+       FROM messages m
+       LEFT JOIN users u ON m.sender_id = u.id
+       WHERE m.room_id = $1 ${timeCondition}
+       ORDER BY m.created_at ${after ? 'ASC' : 'DESC'}
+       LIMIT $2`,
+      params
+    )
+
+    // 읽지 않은 메시지 읽음 처리 (after 쿼리가 아닐 때만)
+    if (!after) {
+      await query(
+        `UPDATE messages
+         SET is_read = true
+         WHERE room_id = $1 AND sender_id != $2 AND is_read = false`,
+        [roomId, userId]
+      )
+    }
+
+    const messages = after ? messagesResult.rows : messagesResult.rows.reverse()
+
+    return res.status(200).json({
+      messages,
+      hasMore: messagesResult.rows.length === parseInt(limit as string, 10),
+    })
+  } catch (error) {
     console.error('Messages fetch error:', error)
     return res.status(500).json({ error: '메시지를 불러오는데 실패했습니다.' })
   }
-
-  // 읽지 않은 메시지 읽음 처리
-  await supabase
-    .from('messages')
-    .update({ is_read: true })
-    .eq('room_id', roomId)
-    .neq('sender_id', userId)
-    .eq('is_read', false)
-
-  return res.status(200).json({
-    messages: messages?.reverse() || [],
-    hasMore: messages?.length === parseInt(limit as string, 10),
-  })
 }
 
 async function handlePost(
@@ -102,47 +121,54 @@ async function handlePost(
     return res.status(400).json({ error: '메시지는 1000자 이내로 작성해주세요.' })
   }
 
-  const supabase = createServerClient()
+  try {
+    // 채팅방 접근 권한 확인
+    const roomResult = await query<{
+      id: string
+      caregiver_id: string
+      guardian_id: string
+    }>(
+      'SELECT id, caregiver_id, guardian_id FROM chat_rooms WHERE id = $1',
+      [roomId]
+    )
 
-  // 채팅방 접근 권한 확인
-  const { data: room, error: roomError } = await supabase
-    .from('chat_rooms')
-    .select('id, caregiver_id, guardian_id')
-    .eq('id', roomId)
-    .single()
+    if (roomResult.rows.length === 0) {
+      return res.status(404).json({ error: '채팅방을 찾을 수 없습니다.' })
+    }
 
-  if (roomError || !room) {
-    return res.status(404).json({ error: '채팅방을 찾을 수 없습니다.' })
-  }
+    const room = roomResult.rows[0]
 
-  if (room.caregiver_id !== userId && room.guardian_id !== userId) {
-    return res.status(403).json({ error: '접근 권한이 없습니다.' })
-  }
+    if (room.caregiver_id !== userId && room.guardian_id !== userId) {
+      return res.status(403).json({ error: '접근 권한이 없습니다.' })
+    }
 
-  // 메시지 저장
-  const { data: message, error } = await supabase
-    .from('messages')
-    .insert({
-      room_id: roomId,
-      sender_id: userId,
-      content: content.trim(),
-    })
-    .select(`
-      *,
-      sender:users!sender_id(id, name, avatar_url)
-    `)
-    .single()
+    // 메시지 저장
+    const messageResult = await query(
+      'INSERT INTO messages (room_id, sender_id, content) VALUES ($1, $2, $3) RETURNING *',
+      [roomId, userId, content.trim()]
+    )
 
-  if (error) {
+    // Sender 정보 조회
+    const fullMessageResult = await query(
+      `SELECT
+        m.*,
+        json_build_object(
+          'id', u.id,
+          'name', u.name,
+          'avatar_url', u.avatar_url
+        ) as sender
+       FROM messages m
+       LEFT JOIN users u ON m.sender_id = u.id
+       WHERE m.id = $1`,
+      [messageResult.rows[0].id]
+    )
+
+    // 채팅방 updated_at 갱신
+    await query('UPDATE chat_rooms SET updated_at = NOW() WHERE id = $1', [roomId])
+
+    return res.status(201).json({ success: true, message: fullMessageResult.rows[0] })
+  } catch (error) {
     console.error('Message create error:', error)
     return res.status(500).json({ error: '메시지 전송에 실패했습니다.' })
   }
-
-  // 채팅방 updated_at 갱신
-  await supabase
-    .from('chat_rooms')
-    .update({ updated_at: new Date().toISOString() })
-    .eq('id', roomId)
-
-  return res.status(201).json({ success: true, message })
 }

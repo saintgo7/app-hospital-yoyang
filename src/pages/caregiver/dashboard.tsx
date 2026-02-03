@@ -6,7 +6,6 @@ import { Layout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, Application, CaregiverProfile } from '@/types/database.types'
 
 interface Props {
@@ -241,71 +240,38 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  // 사용자 정보
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, name, email')
-    .eq('email', session.user.email)
-    .single()
+  try {
+    // API 라우트를 통해 대시보드 데이터 조회
+    const response = await fetch(`${baseUrl}/api/caregiver/dashboard`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard data')
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        user: data.user,
+        profile: data.profile,
+        applications: data.applications,
+        stats: data.stats,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching dashboard:', error)
     return {
       redirect: {
-        destination: '/auth/complete-profile',
+        destination: '/auth/login',
         permanent: false,
       },
     }
-  }
-
-  // 간병인 프로필
-  const { data: profile } = await supabase
-    .from('caregiver_profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  // 지원 내역 (최근 5개)
-  const { data: applications } = await supabase
-    .from('applications')
-    .select(`
-      *,
-      job:job_postings(*)
-    `)
-    .eq('caregiver_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // 통계
-  const { count: totalApplications } = await supabase
-    .from('applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('caregiver_id', user.id)
-
-  const { count: pendingApplications } = await supabase
-    .from('applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('caregiver_id', user.id)
-    .eq('status', 'pending')
-
-  const { count: acceptedApplications } = await supabase
-    .from('applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('caregiver_id', user.id)
-    .eq('status', 'accepted')
-
-  return {
-    props: {
-      user,
-      profile: profile || null,
-      applications: (applications as (Application & { job: JobPosting })[]) || [],
-      stats: {
-        totalApplications: totalApplications || 0,
-        pendingApplications: pendingApplications || 0,
-        acceptedApplications: acceptedApplications || 0,
-      },
-    },
   }
 }
 

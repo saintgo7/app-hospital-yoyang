@@ -1,6 +1,8 @@
 /**
- * Supabase Database 타입 정의
- * @description supabase gen types typescript로 자동 생성 예정
+ * PostgreSQL Database 타입 정의
+ * @description 데이터베이스 테이블 스키마 기반 TypeScript 타입
+ *
+ * Migration note: Migrated from Supabase to PostgreSQL (2026-02-03)
  */
 
 export type Json =

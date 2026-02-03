@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, User } from '@/types/database.types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
@@ -251,43 +250,31 @@ const JobDetailPage: NextPage<Props> = ({ job, hasApplied: initialHasApplied }) 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const { id } = context.params as { id: string }
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: job, error } = await supabase
-    .from('job_postings')
-    .select(`
-      *,
-      guardian:users!guardian_id(id, name, avatar_url)
-    `)
-    .eq('id', id)
-    .single()
+  try {
+    // API 라우트를 통해 구인글 조회
+    const response = await fetch(`${baseUrl}/api/jobs/${id}`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (error || !job) {
+    if (!response.ok) {
+      return { notFound: true }
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        job: data.job,
+        hasApplied: data.hasApplied,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching job:', error)
     return { notFound: true }
-  }
-
-  // 로그인한 간병인이 이미 지원했는지 확인
-  let hasApplied = false
-  const { getServerSession } = await import('next-auth')
-  const { authOptions } = await import('../api/auth/[...nextauth]')
-  const session = await getServerSession(context.req, context.res, authOptions)
-
-  if (session?.user?.role === 'caregiver') {
-    const { data: application } = await supabase
-      .from('applications')
-      .select('id')
-      .eq('job_id', id)
-      .eq('caregiver_id', session.user.id)
-      .single()
-
-    hasApplied = !!application
-  }
-
-  return {
-    props: {
-      job: job as JobWithGuardian,
-      hasApplied,
-    },
   }
 }
 

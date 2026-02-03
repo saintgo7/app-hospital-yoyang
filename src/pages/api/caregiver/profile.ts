@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -33,20 +33,31 @@ async function handleGet(
   res: NextApiResponse,
   userId: string
 ) {
-  const supabase = createServerClient()
+  try {
+    // 사용자 정보 조회
+    const userResult = await query(
+      'SELECT id, name, email FROM users WHERE id = $1',
+      [userId]
+    )
 
-  const { data: profile, error } = await supabase
-    .from('caregiver_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' })
+    }
 
-  if (error && error.code !== 'PGRST116') {
+    // 프로필 조회
+    const profileResult = await query(
+      'SELECT * FROM caregiver_profiles WHERE user_id = $1',
+      [userId]
+    )
+
+    return res.status(200).json({
+      user: userResult.rows[0],
+      profile: profileResult.rows[0] || null,
+    })
+  } catch (error) {
     console.error('Profile fetch error:', error)
     return res.status(500).json({ error: '프로필을 불러오는데 실패했습니다.' })
   }
-
-  return res.status(200).json({ profile: profile || null })
 }
 
 async function handlePut(
@@ -64,48 +75,63 @@ async function handlePut(
     location,
   } = req.body
 
-  const supabase = createServerClient()
+  try {
+    // 기존 프로필 확인
+    const existingResult = await query(
+      'SELECT id FROM caregiver_profiles WHERE user_id = $1',
+      [userId]
+    )
 
-  // 기존 프로필 확인
-  const { data: existingProfile } = await supabase
-    .from('caregiver_profiles')
-    .select('id')
-    .eq('user_id', userId)
-    .single()
+    let result
+    if (existingResult.rows.length > 0) {
+      // 업데이트
+      result = await query(
+        `UPDATE caregiver_profiles
+         SET experience_years = $1,
+             certifications = $2,
+             specializations = $3,
+             introduction = $4,
+             hourly_rate = $5,
+             is_available = $6,
+             location = $7
+         WHERE user_id = $8
+         RETURNING *`,
+        [
+          experienceYears || 0,
+          certifications || [],
+          specializations || [],
+          introduction || null,
+          hourlyRate || null,
+          isAvailable ?? true,
+          location || null,
+          userId,
+        ]
+      )
+    } else {
+      // 생성
+      result = await query(
+        `INSERT INTO caregiver_profiles (
+          user_id, experience_years, certifications, specializations,
+          introduction, hourly_rate, is_available, location
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *`,
+        [
+          userId,
+          experienceYears || 0,
+          certifications || [],
+          specializations || [],
+          introduction || null,
+          hourlyRate || null,
+          isAvailable ?? true,
+          location || null,
+        ]
+      )
+    }
 
-  const profileData = {
-    user_id: userId,
-    experience_years: experienceYears || 0,
-    certifications: certifications || [],
-    specializations: specializations || [],
-    introduction: introduction || null,
-    hourly_rate: hourlyRate || null,
-    is_available: isAvailable ?? true,
-    location: location || null,
-  }
-
-  let result
-  if (existingProfile) {
-    // 업데이트
-    result = await supabase
-      .from('caregiver_profiles')
-      .update(profileData)
-      .eq('user_id', userId)
-      .select()
-      .single()
-  } else {
-    // 생성
-    result = await supabase
-      .from('caregiver_profiles')
-      .insert(profileData)
-      .select()
-      .single()
-  }
-
-  if (result.error) {
-    console.error('Profile update error:', result.error)
+    return res.status(200).json({ success: true, profile: result.rows[0] })
+  } catch (error) {
+    console.error('Profile update error:', error)
     return res.status(500).json({ error: '프로필 저장에 실패했습니다.' })
   }
-
-  return res.status(200).json({ success: true, profile: result.data })
 }

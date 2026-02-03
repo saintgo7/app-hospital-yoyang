@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -34,37 +34,72 @@ async function handleGet(
   applicationId: string,
   userId: string
 ) {
-  const supabase = createServerClient()
+  try {
+    const result = await query(
+      `SELECT
+        a.*,
+        json_build_object(
+          'id', c.id,
+          'name', c.name,
+          'avatar_url', c.avatar_url,
+          'caregiver_profile', (
+            SELECT json_build_object(
+              'id', cp.id,
+              'experience_years', cp.experience_years,
+              'certifications', cp.certifications,
+              'specializations', cp.specializations,
+              'introduction', cp.introduction,
+              'hourly_rate', cp.hourly_rate,
+              'is_available', cp.is_available,
+              'location', cp.location
+            )
+            FROM caregiver_profiles cp
+            WHERE cp.user_id = c.id
+          )
+        ) as caregiver,
+        json_build_object(
+          'id', j.id,
+          'title', j.title,
+          'description', j.description,
+          'location', j.location,
+          'care_type', j.care_type,
+          'start_date', j.start_date,
+          'end_date', j.end_date,
+          'hourly_rate', j.hourly_rate,
+          'status', j.status,
+          'guardian_id', j.guardian_id,
+          'guardian', json_build_object(
+            'id', g.id,
+            'name', g.name
+          )
+        ) as job
+       FROM applications a
+       LEFT JOIN users c ON a.caregiver_id = c.id
+       LEFT JOIN job_postings j ON a.job_id = j.id
+       LEFT JOIN users g ON j.guardian_id = g.id
+       WHERE a.id = $1`,
+      [applicationId]
+    )
 
-  const { data: application, error } = await supabase
-    .from('applications')
-    .select(`
-      *,
-      caregiver:users!caregiver_id(
-        id, name, avatar_url,
-        caregiver_profile:caregiver_profiles(*)
-      ),
-      job:job_postings(
-        *,
-        guardian:users!guardian_id(id, name)
-      )
-    `)
-    .eq('id', applicationId)
-    .single()
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
+    }
 
-  if (error || !application) {
-    return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
+    const application = result.rows[0]
+
+    // 권한 확인: 지원자 본인 또는 구인글 작성자만 조회 가능
+    const isCaregiver = application.caregiver_id === userId
+    const isGuardian = application.job.guardian_id === userId
+
+    if (!isCaregiver && !isGuardian) {
+      return res.status(403).json({ error: '접근 권한이 없습니다.' })
+    }
+
+    return res.status(200).json({ application })
+  } catch (error) {
+    console.error('Application fetch error:', error)
+    return res.status(500).json({ error: '지원 내역을 불러오는데 실패했습니다.' })
   }
-
-  // 권한 확인: 지원자 본인 또는 구인글 작성자만 조회 가능
-  const isCaregiver = application.caregiver_id === userId
-  const isGuardian = application.job.guardian_id === userId
-
-  if (!isCaregiver && !isGuardian) {
-    return res.status(403).json({ error: '접근 권한이 없습니다.' })
-  }
-
-  return res.status(200).json({ application })
 }
 
 async function handlePatch(
@@ -85,58 +120,59 @@ async function handlePatch(
     return res.status(403).json({ error: '보호자만 상태를 변경할 수 있습니다.' })
   }
 
-  const supabase = createServerClient()
+  try {
+    // 지원 내역 조회 및 권한 확인
+    const appResult = await query<{
+      id: string
+      caregiver_id: string
+      job_id: string
+      guardian_id: string
+    }>(
+      `SELECT a.id, a.caregiver_id, a.job_id, j.guardian_id
+       FROM applications a
+       JOIN job_postings j ON a.job_id = j.id
+       WHERE a.id = $1`,
+      [applicationId]
+    )
 
-  // 지원 내역 조회 및 권한 확인
-  const { data: application, error: fetchError } = await supabase
-    .from('applications')
-    .select(`
-      *,
-      job:job_postings(guardian_id)
-    `)
-    .eq('id', applicationId)
-    .single()
+    if (appResult.rows.length === 0) {
+      return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
+    }
 
-  if (fetchError || !application) {
-    return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
-  }
+    const application = appResult.rows[0]
 
-  if (application.job.guardian_id !== userId) {
-    return res.status(403).json({ error: '본인의 구인글에 대한 지원만 처리할 수 있습니다.' })
-  }
+    if (application.guardian_id !== userId) {
+      return res.status(403).json({ error: '본인의 구인글에 대한 지원만 처리할 수 있습니다.' })
+    }
 
-  // 상태 업데이트
-  const { data: updatedApplication, error } = await supabase
-    .from('applications')
-    .update({ status })
-    .eq('id', applicationId)
-    .select()
-    .single()
+    // 상태 업데이트
+    const updateResult = await query(
+      'UPDATE applications SET status = $1 WHERE id = $2 RETURNING *',
+      [status, applicationId]
+    )
 
-  if (error) {
+    // 수락된 경우 채팅방 생성
+    if (status === 'accepted') {
+      const roomResult = await query(
+        `SELECT id FROM chat_rooms
+         WHERE caregiver_id = $1 AND guardian_id = $2`,
+        [application.caregiver_id, userId]
+      )
+
+      if (roomResult.rows.length === 0) {
+        await query(
+          `INSERT INTO chat_rooms (job_id, caregiver_id, guardian_id)
+           VALUES ($1, $2, $3)`,
+          [application.job_id, application.caregiver_id, userId]
+        )
+      }
+    }
+
+    return res.status(200).json({ success: true, application: updateResult.rows[0] })
+  } catch (error) {
     console.error('Application update error:', error)
     return res.status(500).json({ error: '상태 변경에 실패했습니다.' })
   }
-
-  // 수락된 경우 채팅방 생성
-  if (status === 'accepted') {
-    const { data: existingRoom } = await supabase
-      .from('chat_rooms')
-      .select('id')
-      .eq('caregiver_id', application.caregiver_id)
-      .eq('guardian_id', userId)
-      .single()
-
-    if (!existingRoom) {
-      await supabase.from('chat_rooms').insert({
-        job_id: application.job_id,
-        caregiver_id: application.caregiver_id,
-        guardian_id: userId,
-      })
-    }
-  }
-
-  return res.status(200).json({ success: true, application: updatedApplication })
 }
 
 async function handleDelete(
@@ -151,37 +187,37 @@ async function handleDelete(
     return res.status(403).json({ error: '간병인만 지원을 취소할 수 있습니다.' })
   }
 
-  const supabase = createServerClient()
+  try {
+    // 지원 내역 조회 및 권한 확인
+    const appResult = await query<{
+      id: string
+      caregiver_id: string
+      status: string
+    }>(
+      'SELECT id, caregiver_id, status FROM applications WHERE id = $1',
+      [applicationId]
+    )
 
-  // 지원 내역 조회 및 권한 확인
-  const { data: application, error: fetchError } = await supabase
-    .from('applications')
-    .select('*')
-    .eq('id', applicationId)
-    .single()
+    if (appResult.rows.length === 0) {
+      return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
+    }
 
-  if (fetchError || !application) {
-    return res.status(404).json({ error: '지원 내역을 찾을 수 없습니다.' })
-  }
+    const application = appResult.rows[0]
 
-  if (application.caregiver_id !== userId) {
-    return res.status(403).json({ error: '본인의 지원만 취소할 수 있습니다.' })
-  }
+    if (application.caregiver_id !== userId) {
+      return res.status(403).json({ error: '본인의 지원만 취소할 수 있습니다.' })
+    }
 
-  if (application.status !== 'pending') {
-    return res.status(400).json({ error: '대기 중인 지원만 취소할 수 있습니다.' })
-  }
+    if (application.status !== 'pending') {
+      return res.status(400).json({ error: '대기 중인 지원만 취소할 수 있습니다.' })
+    }
 
-  // 삭제
-  const { error } = await supabase
-    .from('applications')
-    .delete()
-    .eq('id', applicationId)
+    // 삭제
+    await query('DELETE FROM applications WHERE id = $1', [applicationId])
 
-  if (error) {
+    return res.status(200).json({ success: true })
+  } catch (error) {
     console.error('Application delete error:', error)
     return res.status(500).json({ error: '지원 취소에 실패했습니다.' })
   }
-
-  return res.status(200).json({ success: true })
 }

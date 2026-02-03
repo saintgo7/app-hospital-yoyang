@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, Application, User, CaregiverProfile } from '@/types/database.types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
@@ -403,62 +402,32 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    // API 라우트를 통해 구인글 정보 조회
+    const response = await fetch(`${baseUrl}/api/guardian/jobs/${id}`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      return { notFound: true }
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        job: data.job,
+        applications: data.applications || [],
+        hasReviewed: data.hasReviewed || false,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching job:', error)
     return { notFound: true }
-  }
-
-  const { data: job, error } = await supabase
-    .from('job_postings')
-    .select('*')
-    .eq('id', id)
-    .eq('guardian_id', user.id)
-    .single()
-
-  if (error || !job) {
-    return { notFound: true }
-  }
-
-  const { data: applications } = await supabase
-    .from('applications')
-    .select(`
-      *,
-      caregiver:users!caregiver_id(
-        *,
-        caregiver_profile:caregiver_profiles(*)
-      )
-    `)
-    .eq('job_id', id)
-    .order('created_at', { ascending: false })
-
-  // 리뷰 작성 여부 확인
-  const acceptedApp = applications?.find(a => a.status === 'accepted')
-  let hasReviewed = false
-
-  if (acceptedApp && job.status === 'completed') {
-    const { data: review } = await supabase
-      .from('reviews')
-      .select('id')
-      .eq('job_id', id)
-      .eq('reviewer_id', user.id)
-      .single()
-
-    hasReviewed = !!review
-  }
-
-  return {
-    props: {
-      job,
-      applications: (applications as ApplicationWithCaregiver[]) || [],
-      hasReviewed,
-    },
   }
 }
 

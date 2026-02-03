@@ -7,7 +7,6 @@ import { Layout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, Application } from '@/types/database.types'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
@@ -188,36 +187,34 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    // API 라우트를 통해 구인글 목록 조회
+    const response = await fetch(`${baseUrl}/api/guardian/jobs`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch jobs')
+    }
+
+    const data = await response.json()
+
     return {
-      redirect: {
-        destination: '/auth/complete-profile',
-        permanent: false,
+      props: {
+        jobs: data.jobs || [],
       },
     }
-  }
-
-  const { data: jobs } = await supabase
-    .from('job_postings')
-    .select(`
-      *,
-      applications(*)
-    `)
-    .eq('guardian_id', user.id)
-    .order('created_at', { ascending: false })
-
-  return {
-    props: {
-      jobs: (jobs as JobWithApplications[]) || [],
-    },
+  } catch (error) {
+    console.error('Error fetching jobs:', error)
+    return {
+      props: {
+        jobs: [],
+      },
+    }
   }
 }
 

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, User } from '@/types/database.types'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
@@ -167,26 +166,38 @@ const JobCard = memo(function JobCard({
 })
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  // 모집 중인 구인글
-  const { data: jobs } = await supabase
-    .from('job_postings')
-    .select(`
-      *,
-      guardian:users!guardian_id(id, name)
-    `)
-    .eq('status', 'open')
-    .order('created_at', { ascending: false })
+  try {
+    // API 라우트를 통해 구인글 조회
+    const response = await fetch(`${baseUrl}/api/jobs?status=open`)
 
-  // 지역 목록 (중복 제거)
-  const locations = Array.from(new Set((jobs || []).map((job) => job.location.split(' ')[0])))
+    if (!response.ok) {
+      throw new Error('Failed to fetch jobs')
+    }
 
-  return {
-    props: {
-      jobs: (jobs as JobWithGuardian[]) || [],
-      locations,
-    },
+    const data = await response.json()
+    const jobs = data.jobs || []
+
+    // 지역 목록 (중복 제거)
+    const locations = Array.from(
+      new Set(jobs.map((job: JobWithGuardian) => job.location.split(' ')[0]))
+    ) as string[]
+
+    return {
+      props: {
+        jobs,
+        locations,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching jobs:', error)
+    return {
+      props: {
+        jobs: [],
+        locations: [],
+      },
+    }
   }
 }
 

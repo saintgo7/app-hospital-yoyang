@@ -1,6 +1,6 @@
-import type { NextPage } from 'next'
+import type { NextPage, GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { Layout } from '@/components/layout'
+import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -56,6 +56,13 @@ const AuthErrorPage: NextPage = () => {
       </div>
     </Layout>
   )
+}
+
+// Force SSR to support useRouter
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    props: {},
+  }
 }
 
 export default AuthErrorPage

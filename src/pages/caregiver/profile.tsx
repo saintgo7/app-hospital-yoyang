@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createServerClient } from '@/lib/supabase'
 import type { CaregiverProfile, User } from '@/types/database.types'
 
 const SPECIALIZATIONS = [
@@ -311,34 +310,36 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, name, email')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    // API 라우트를 통해 프로필 데이터 조회
+    const response = await fetch(`${baseUrl}/api/caregiver/profile`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch profile data')
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        user: data.user,
+        profile: data.profile,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching profile:', error)
     return {
       redirect: {
-        destination: '/auth/complete-profile',
+        destination: '/auth/login',
         permanent: false,
       },
     }
-  }
-
-  const { data: profile } = await supabase
-    .from('caregiver_profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  return {
-    props: {
-      user,
-      profile: profile || null,
-    },
   }
 }
 

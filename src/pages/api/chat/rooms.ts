@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,54 +28,70 @@ async function handleGet(
   userId: string,
   role: string
 ) {
-  const supabase = createServerClient()
+  try {
+    // 역할에 따라 채팅방 조회
+    const column = role === 'guardian' ? 'guardian_id' : 'caregiver_id'
 
-  // 역할에 따라 채팅방 조회
-  const column = role === 'guardian' ? 'guardian_id' : 'caregiver_id'
+    // 채팅방 목록 조회
+    const roomsResult = await query(
+      `SELECT
+        cr.*,
+        json_build_object(
+          'id', j.id,
+          'title', j.title,
+          'status', j.status
+        ) as job,
+        json_build_object(
+          'id', c.id,
+          'name', c.name,
+          'avatar_url', c.avatar_url
+        ) as caregiver,
+        json_build_object(
+          'id', g.id,
+          'name', g.name,
+          'avatar_url', g.avatar_url
+        ) as guardian
+       FROM chat_rooms cr
+       LEFT JOIN job_postings j ON cr.job_id = j.id
+       LEFT JOIN users c ON cr.caregiver_id = c.id
+       LEFT JOIN users g ON cr.guardian_id = g.id
+       WHERE cr.${column} = $1
+       ORDER BY cr.updated_at DESC`,
+      [userId]
+    )
 
-  const { data: rooms, error } = await supabase
-    .from('chat_rooms')
-    .select(`
-      *,
-      job:job_postings(id, title, status),
-      caregiver:users!caregiver_id(id, name, avatar_url),
-      guardian:users!guardian_id(id, name, avatar_url),
-      messages(
-        id,
-        content,
-        sender_id,
-        is_read,
-        created_at
-      )
-    `)
-    .eq(column, userId)
-    .order('updated_at', { ascending: false })
+    // 각 채팅방의 마지막 메시지와 읽지 않은 메시지 수 조회
+    const roomsWithMeta = await Promise.all(
+      roomsResult.rows.map(async (room: any) => {
+        // 마지막 메시지 조회
+        const lastMessageResult = await query(
+          `SELECT id, content, sender_id, is_read, created_at
+           FROM messages
+           WHERE room_id = $1
+           ORDER BY created_at DESC
+           LIMIT 1`,
+          [room.id]
+        )
 
-  if (error) {
+        // 읽지 않은 메시지 수 조회
+        const unreadResult = await query(
+          `SELECT COUNT(*) as count
+           FROM messages
+           WHERE room_id = $1 AND sender_id != $2 AND is_read = false`,
+          [room.id, userId]
+        )
+
+        return {
+          ...room,
+          lastMessage: lastMessageResult.rows[0] || null,
+          unreadCount: parseInt(unreadResult.rows[0].count, 10),
+        }
+      })
+    )
+
+    return res.status(200).json({ rooms: roomsWithMeta })
+  } catch (error) {
     console.error('Chat rooms fetch error:', error)
     return res.status(500).json({ error: '채팅방 목록을 불러오는데 실패했습니다.' })
   }
-
-  // 각 채팅방의 마지막 메시지와 읽지 않은 메시지 수 계산
-  const roomsWithMeta = rooms?.map((room) => {
-    const messages = room.messages || []
-    const sortedMessages = messages.sort(
-      (a: { created_at: string }, b: { created_at: string }) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-    const lastMessage = sortedMessages[0] || null
-    const unreadCount = messages.filter(
-      (m: { is_read: boolean; sender_id: string }) =>
-        !m.is_read && m.sender_id !== userId
-    ).length
-
-    return {
-      ...room,
-      lastMessage,
-      unreadCount,
-      messages: undefined, // 메시지 배열 제거
-    }
-  })
-
-  return res.status(200).json({ rooms: roomsWithMeta })
 }

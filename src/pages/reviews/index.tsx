@@ -7,7 +7,6 @@ import { Layout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ReviewCard, ReviewSummary } from '@/components/common/ReviewCard'
-import { createServerClient } from '@/lib/supabase'
 import type { Review, User } from '@/types/database.types'
 
 interface ReviewWithRelations extends Review {
@@ -131,60 +130,38 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, role')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    // API 라우트를 통해 리뷰 조회
+    const response = await fetch(`${baseUrl}/api/reviews?type=my`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch reviews')
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        receivedReviews: data.receivedReviews || [],
+        givenReviews: data.givenReviews || [],
+        averageRating: data.averageRating,
+        role: data.role,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching reviews:', error)
     return {
       redirect: {
-        destination: '/auth/complete-profile',
+        destination: '/auth/login',
         permanent: false,
       },
     }
-  }
-
-  // 받은 리뷰
-  const { data: receivedReviews } = await supabase
-    .from('reviews')
-    .select(`
-      *,
-      reviewer:users!reviewer_id(id, name, avatar_url, role),
-      reviewee:users!reviewee_id(id, name, avatar_url, role),
-      job:job_postings(id, title)
-    `)
-    .eq('reviewee_id', user.id)
-    .order('created_at', { ascending: false })
-
-  // 작성한 리뷰
-  const { data: givenReviews } = await supabase
-    .from('reviews')
-    .select(`
-      *,
-      reviewer:users!reviewer_id(id, name, avatar_url, role),
-      reviewee:users!reviewee_id(id, name, avatar_url, role),
-      job:job_postings(id, title)
-    `)
-    .eq('reviewer_id', user.id)
-    .order('created_at', { ascending: false })
-
-  // 평균 평점 계산
-  const averageRating =
-    receivedReviews && receivedReviews.length > 0
-      ? receivedReviews.reduce((sum, r) => sum + r.rating, 0) / receivedReviews.length
-      : 0
-
-  return {
-    props: {
-      receivedReviews: (receivedReviews as ReviewWithRelations[]) || [],
-      givenReviews: (givenReviews as ReviewWithRelations[]) || [],
-      averageRating: Math.round(averageRating * 10) / 10,
-      role: user.role,
-    },
   }
 }
 

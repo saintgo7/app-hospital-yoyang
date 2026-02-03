@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createServerClient } from '@/lib/supabase'
 import type { CaregiverProfile, User } from '@/types/database.types'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
@@ -212,38 +211,32 @@ const CaregiversPage: NextPage<Props> = ({ caregivers: initialCaregivers, locati
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  // 프로필이 완성된 간병인 목록
-  const { data: caregivers } = await supabase
-    .from('users')
-    .select(`
-      *,
-      caregiver_profile:caregiver_profiles(*)
-    `)
-    .eq('role', 'caregiver')
-    .order('created_at', { ascending: false })
+  try {
+    // API 라우트를 통해 간병인 목록 조회
+    const response = await fetch(`${baseUrl}/api/caregivers`)
 
-  // 프로필이 있는 간병인만 필터링
-  const filteredCaregivers = (caregivers || []).filter(
-    (c) => c.caregiver_profile && c.caregiver_profile.length > 0
-  )
+    if (!response.ok) {
+      throw new Error('Failed to fetch caregivers')
+    }
 
-  // 지역 목록 (중복 제거)
-  const locations = Array.from(
-    new Set(
-      filteredCaregivers
-        .map((c) => c.caregiver_profile?.[0]?.location)
-        .filter(Boolean)
-        .map((loc) => loc!.split(' ')[0])
-    )
-  )
+    const data = await response.json()
 
-  return {
-    props: {
-      caregivers: filteredCaregivers as CaregiverWithProfile[],
-      locations,
-    },
+    return {
+      props: {
+        caregivers: data.caregivers,
+        locations: data.locations,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching caregivers:', error)
+    return {
+      props: {
+        caregivers: [],
+        locations: [],
+      },
+    }
   }
 }
 

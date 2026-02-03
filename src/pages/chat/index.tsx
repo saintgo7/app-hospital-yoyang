@@ -7,7 +7,6 @@ import { Layout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createServerClient, createBrowserClient } from '@/lib/supabase'
 import type { ChatRoom, User, JobPosting, Message } from '@/types/database.types'
 import { getTimeAgo } from '@/lib/utils'
 
@@ -28,35 +27,24 @@ interface Props {
 const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, role }) => {
   const [rooms, setRooms] = useState(initialRooms)
 
+  // Polling으로 채팅방 목록 갱신 (Realtime 대체)
   useEffect(() => {
-    const supabase = createBrowserClient()
-
-    // 실시간 메시지 구독
-    const channel = supabase
-      .channel('chat-rooms')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        async (payload) => {
-          const newMessage = payload.new as Message
-
-          // 채팅방 목록 새로고침
-          const response = await fetch('/api/chat/rooms')
-          if (response.ok) {
-            const data = await response.json()
-            setRooms(data.rooms)
-          }
+    const pollRooms = async () => {
+      try {
+        const response = await fetch('/api/chat/rooms')
+        if (response.ok) {
+          const data = await response.json()
+          setRooms(data.rooms)
         }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+      } catch (error) {
+        console.error('Poll rooms error:', error)
+      }
     }
+
+    // 5초마다 폴링
+    const interval = setInterval(pollRooms, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const getOtherUser = (room: ChatRoomWithMeta) => {
@@ -78,7 +66,7 @@ const ChatListPage: NextPage<Props> = ({ rooms: initialRooms, currentUserId, rol
         {rooms.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <div className="text-5xl mb-4">[...]</div>
+              <div className="text-5xl mb-4">💬</div>
               <p className="text-lg text-muted-foreground mb-2">
                 아직 대화가 없습니다.
               </p>
@@ -168,68 +156,39 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  // API 라우트를 통해 데이터 조회
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, role')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    const response = await fetch(`${baseUrl}/api/chat/rooms`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch chat rooms')
+    }
+
+    const data = await response.json()
+    const user = session.user as any
+
     return {
-      redirect: {
-        destination: '/auth/complete-profile',
-        permanent: false,
+      props: {
+        rooms: data.rooms || [],
+        currentUserId: user.id,
+        role: user.role,
       },
     }
-  }
-
-  const column = user.role === 'guardian' ? 'guardian_id' : 'caregiver_id'
-
-  const { data: rooms } = await supabase
-    .from('chat_rooms')
-    .select(`
-      *,
-      job:job_postings(id, title, status),
-      caregiver:users!caregiver_id(id, name, avatar_url),
-      guardian:users!guardian_id(id, name, avatar_url),
-      messages(
-        id,
-        content,
-        sender_id,
-        is_read,
-        created_at
-      )
-    `)
-    .eq(column, user.id)
-    .order('updated_at', { ascending: false })
-
-  const roomsWithMeta = rooms?.map((room) => {
-    const messages = room.messages || []
-    const sortedMessages = [...messages].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-    const lastMessage = sortedMessages[0] || null
-    const unreadCount = messages.filter(
-      (m: { is_read: boolean; sender_id: string }) =>
-        !m.is_read && m.sender_id !== user.id
-    ).length
-
+  } catch (error) {
+    console.error('Error fetching chat rooms:', error)
     return {
-      ...room,
-      lastMessage,
-      unreadCount,
-      messages: undefined,
+      props: {
+        rooms: [],
+        currentUserId: (session.user as any).id,
+        role: (session.user as any).role,
+      },
     }
-  }) || []
-
-  return {
-    props: {
-      rooms: roomsWithMeta as ChatRoomWithMeta[],
-      currentUserId: user.id,
-      role: user.role,
-    },
   }
 }
 

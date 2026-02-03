@@ -7,7 +7,6 @@ import { Layout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ReviewForm } from '@/components/common/ReviewForm'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, User } from '@/types/database.types'
 
 interface Props {
@@ -145,94 +144,35 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  // 사용자 정보 조회
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, role')
-    .eq('email', session.user.email!)
-    .single()
+  try {
+    // API 라우트를 통해 리뷰 작성 정보 조회
+    const response = await fetch(`${baseUrl}/api/reviews/write/${jobId}`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      if (response.status === 404 || response.status === 403) {
+        return { notFound: true }
+      }
+      throw new Error('Failed to fetch review write data')
+    }
+
+    const data = await response.json()
+
     return {
-      redirect: {
-        destination: '/auth/complete-profile',
-        permanent: false,
+      props: {
+        job: data.job,
+        reviewee: data.reviewee,
+        alreadyReviewed: data.alreadyReviewed,
       },
     }
-  }
-
-  // 일자리 정보 조회
-  const { data: job, error: jobError } = await supabase
-    .from('job_postings')
-    .select('*')
-    .eq('id', jobId)
-    .eq('status', 'completed')
-    .single()
-
-  if (jobError || !job) {
+  } catch (error) {
+    console.error('Error fetching review write data:', error)
     return { notFound: true }
-  }
-
-  // 수락된 지원 조회
-  const { data: application } = await supabase
-    .from('applications')
-    .select(`
-      caregiver_id,
-      caregiver:users!caregiver_id(id, name, avatar_url)
-    `)
-    .eq('job_id', jobId)
-    .eq('status', 'accepted')
-    .single()
-
-  if (!application) {
-    return { notFound: true }
-  }
-
-  // 권한 확인
-  const isGuardian = job.guardian_id === user.id
-  const isCaregiver = application.caregiver_id === user.id
-
-  if (!isGuardian && !isCaregiver) {
-    return { notFound: true }
-  }
-
-  // 리뷰 대상 결정
-  let reviewee: Pick<User, 'id' | 'name' | 'avatar_url'>
-
-  if (isGuardian) {
-    // 보호자 -> 간병인 리뷰
-    reviewee = application.caregiver as Pick<User, 'id' | 'name' | 'avatar_url'>
-  } else {
-    // 간병인 -> 보호자 리뷰
-    const { data: guardian } = await supabase
-      .from('users')
-      .select('id, name, avatar_url')
-      .eq('id', job.guardian_id)
-      .single()
-
-    if (!guardian) {
-      return { notFound: true }
-    }
-    reviewee = guardian
-  }
-
-  // 이미 작성한 리뷰가 있는지 확인
-  const { data: existingReview } = await supabase
-    .from('reviews')
-    .select('id')
-    .eq('job_id', jobId)
-    .eq('reviewer_id', user.id)
-    .eq('reviewee_id', reviewee.id)
-    .single()
-
-  return {
-    props: {
-      job,
-      reviewee,
-      alreadyReviewed: !!existingReview,
-    },
   }
 }
 

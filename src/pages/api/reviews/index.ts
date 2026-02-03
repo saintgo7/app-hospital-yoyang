@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,7 +15,7 @@ export default async function handler(
 
   switch (req.method) {
     case 'GET':
-      return handleGet(req, res)
+      return handleGet(req, res, session.user.id, session.user.role)
     case 'POST':
       return handlePost(req, res, session.user.id)
     default:
@@ -26,48 +26,150 @@ export default async function handler(
 
 async function handleGet(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
+  currentUserId: string,
+  role: string
 ) {
-  const { userId, jobId } = req.query
-  const supabase = createServerClient()
+  const { userId, jobId, type } = req.query
 
-  let query = supabase
-    .from('reviews')
-    .select(`
-      *,
-      reviewer:users!reviewer_id(id, name, avatar_url, role),
-      reviewee:users!reviewee_id(id, name, avatar_url, role),
-      job:job_postings(id, title)
-    `)
-    .order('created_at', { ascending: false })
+  try {
+    // type이 'my'이면 현재 사용자의 받은/작성한 리뷰 모두 반환
+    if (type === 'my') {
+      // 받은 리뷰
+      const receivedResult = await query(
+        `SELECT
+          r.*,
+          json_build_object(
+            'id', reviewer.id,
+            'name', reviewer.name,
+            'avatar_url', reviewer.avatar_url,
+            'role', reviewer.role
+          ) as reviewer,
+          json_build_object(
+            'id', reviewee.id,
+            'name', reviewee.name,
+            'avatar_url', reviewee.avatar_url,
+            'role', reviewee.role
+          ) as reviewee,
+          CASE
+            WHEN r.job_id IS NOT NULL THEN json_build_object('id', j.id, 'title', j.title)
+            ELSE NULL
+          END as job
+         FROM reviews r
+         LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
+         LEFT JOIN users reviewee ON r.reviewee_id = reviewee.id
+         LEFT JOIN job_postings j ON r.job_id = j.id
+         WHERE r.reviewee_id = $1
+         ORDER BY r.created_at DESC`,
+        [currentUserId]
+      )
 
-  // 특정 사용자가 받은 리뷰 조회
-  if (userId) {
-    query = query.eq('reviewee_id', userId as string)
-  }
+      // 작성한 리뷰
+      const givenResult = await query(
+        `SELECT
+          r.*,
+          json_build_object(
+            'id', reviewer.id,
+            'name', reviewer.name,
+            'avatar_url', reviewer.avatar_url,
+            'role', reviewer.role
+          ) as reviewer,
+          json_build_object(
+            'id', reviewee.id,
+            'name', reviewee.name,
+            'avatar_url', reviewee.avatar_url,
+            'role', reviewee.role
+          ) as reviewee,
+          CASE
+            WHEN r.job_id IS NOT NULL THEN json_build_object('id', j.id, 'title', j.title)
+            ELSE NULL
+          END as job
+         FROM reviews r
+         LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
+         LEFT JOIN users reviewee ON r.reviewee_id = reviewee.id
+         LEFT JOIN job_postings j ON r.job_id = j.id
+         WHERE r.reviewer_id = $1
+         ORDER BY r.created_at DESC`,
+        [currentUserId]
+      )
 
-  // 특정 일자리 관련 리뷰 조회
-  if (jobId) {
-    query = query.eq('job_id', jobId as string)
-  }
+      const receivedReviews = receivedResult.rows
+      const givenReviews = givenResult.rows
 
-  const { data: reviews, error } = await query
+      const averageRating =
+        receivedReviews.length > 0
+          ? receivedReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / receivedReviews.length
+          : 0
 
-  if (error) {
+      return res.status(200).json({
+        receivedReviews,
+        givenReviews,
+        averageRating: Math.round(averageRating * 10) / 10,
+        role,
+      })
+    }
+
+    // 기존 로직: userId나 jobId로 필터링
+    const conditions: string[] = []
+    const params: any[] = []
+    let paramIndex = 1
+
+    if (userId) {
+      conditions.push(`r.reviewee_id = $${paramIndex++}`)
+      params.push(userId as string)
+    }
+
+    if (jobId) {
+      conditions.push(`r.job_id = $${paramIndex++}`)
+      params.push(jobId as string)
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+
+    const result = await query(
+      `SELECT
+        r.*,
+        json_build_object(
+          'id', reviewer.id,
+          'name', reviewer.name,
+          'avatar_url', reviewer.avatar_url,
+          'role', reviewer.role
+        ) as reviewer,
+        json_build_object(
+          'id', reviewee.id,
+          'name', reviewee.name,
+          'avatar_url', reviewee.avatar_url,
+          'role', reviewee.role
+        ) as reviewee,
+        CASE
+          WHEN r.job_id IS NOT NULL THEN json_build_object('id', j.id, 'title', j.title)
+          ELSE NULL
+        END as job
+       FROM reviews r
+       LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
+       LEFT JOIN users reviewee ON r.reviewee_id = reviewee.id
+       LEFT JOIN job_postings j ON r.job_id = j.id
+       ${whereClause}
+       ORDER BY r.created_at DESC`,
+      params
+    )
+
+    const reviews = result.rows
+
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length
+        : 0
+
+    return res.status(200).json({
+      reviews,
+      averageRating: Math.round(averageRating * 10) / 10,
+      totalCount: reviews.length,
+    })
+  } catch (error) {
     console.error('Reviews fetch error:', error)
     return res.status(500).json({ error: '리뷰를 불러오는데 실패했습니다.' })
   }
-
-  // 평균 평점 계산
-  const averageRating = reviews && reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0
-
-  return res.status(200).json({
-    reviews,
-    averageRating: Math.round(averageRating * 10) / 10,
-    totalCount: reviews?.length || 0,
-  })
 }
 
 async function handlePost(
@@ -90,86 +192,115 @@ async function handlePost(
     return res.status(400).json({ error: '자신에게 리뷰를 작성할 수 없습니다.' })
   }
 
-  const supabase = createServerClient()
+  try {
+    // 해당 일자리가 완료 상태인지 확인
+    const jobResult = await query<{
+      id: string
+      status: string
+      guardian_id: string
+    }>(
+      'SELECT id, status, guardian_id FROM job_postings WHERE id = $1',
+      [jobId]
+    )
 
-  // 해당 일자리가 완료 상태인지 확인
-  const { data: job, error: jobError } = await supabase
-    .from('job_postings')
-    .select('id, status, guardian_id')
-    .eq('id', jobId)
-    .single()
+    if (jobResult.rows.length === 0) {
+      return res.status(404).json({ error: '일자리를 찾을 수 없습니다.' })
+    }
 
-  if (jobError || !job) {
-    return res.status(404).json({ error: '일자리를 찾을 수 없습니다.' })
-  }
+    const job = jobResult.rows[0]
 
-  if (job.status !== 'completed') {
-    return res.status(400).json({ error: '완료된 일자리에만 리뷰를 작성할 수 있습니다.' })
-  }
+    if (job.status !== 'completed') {
+      return res
+        .status(400)
+        .json({ error: '완료된 일자리에만 리뷰를 작성할 수 있습니다.' })
+    }
 
-  // 이미 리뷰를 작성했는지 확인
-  const { data: existingReview } = await supabase
-    .from('reviews')
-    .select('id')
-    .eq('job_id', jobId)
-    .eq('reviewer_id', userId)
-    .eq('reviewee_id', revieweeId)
-    .single()
+    // 이미 리뷰를 작성했는지 확인
+    const existingResult = await query(
+      'SELECT id FROM reviews WHERE job_id = $1 AND reviewer_id = $2 AND reviewee_id = $3',
+      [jobId, userId, revieweeId]
+    )
 
-  if (existingReview) {
-    return res.status(400).json({ error: '이미 리뷰를 작성하셨습니다.' })
-  }
+    if (existingResult.rows.length > 0) {
+      return res.status(400).json({ error: '이미 리뷰를 작성하셨습니다.' })
+    }
 
-  // 리뷰 작성 권한 확인
-  // 보호자 → 간병인 리뷰 또는 간병인 → 보호자 리뷰만 가능
-  const { data: application } = await supabase
-    .from('applications')
-    .select('caregiver_id')
-    .eq('job_id', jobId)
-    .eq('status', 'accepted')
-    .single()
+    // 리뷰 작성 권한 확인
+    const appResult = await query<{ caregiver_id: string }>(
+      'SELECT caregiver_id FROM applications WHERE job_id = $1 AND status = $2',
+      [jobId, 'accepted']
+    )
 
-  if (!application) {
-    return res.status(400).json({ error: '이 일자리에 대한 리뷰 권한이 없습니다.' })
-  }
+    if (appResult.rows.length === 0) {
+      return res
+        .status(400)
+        .json({ error: '이 일자리에 대한 리뷰 권한이 없습니다.' })
+    }
 
-  const isGuardian = job.guardian_id === userId
-  const isCaregiver = application.caregiver_id === userId
+    const application = appResult.rows[0]
 
-  if (!isGuardian && !isCaregiver) {
-    return res.status(403).json({ error: '이 일자리에 대한 리뷰 권한이 없습니다.' })
-  }
+    const isGuardian = job.guardian_id === userId
+    const isCaregiver = application.caregiver_id === userId
 
-  // 리뷰 대상이 올바른지 확인
-  if (isGuardian && revieweeId !== application.caregiver_id) {
-    return res.status(400).json({ error: '간병인에게만 리뷰를 작성할 수 있습니다.' })
-  }
+    if (!isGuardian && !isCaregiver) {
+      return res
+        .status(403)
+        .json({ error: '이 일자리에 대한 리뷰 권한이 없습니다.' })
+    }
 
-  if (isCaregiver && revieweeId !== job.guardian_id) {
-    return res.status(400).json({ error: '보호자에게만 리뷰를 작성할 수 있습니다.' })
-  }
+    // 리뷰 대상이 올바른지 확인
+    if (isGuardian && revieweeId !== application.caregiver_id) {
+      return res
+        .status(400)
+        .json({ error: '간병인에게만 리뷰를 작성할 수 있습니다.' })
+    }
 
-  // 리뷰 저장
-  const { data: review, error } = await supabase
-    .from('reviews')
-    .insert({
-      job_id: jobId,
-      reviewer_id: userId,
-      reviewee_id: revieweeId,
-      rating,
-      comment: comment || null,
-    })
-    .select(`
-      *,
-      reviewer:users!reviewer_id(id, name, avatar_url, role),
-      reviewee:users!reviewee_id(id, name, avatar_url, role)
-    `)
-    .single()
+    if (isCaregiver && revieweeId !== job.guardian_id) {
+      return res
+        .status(400)
+        .json({ error: '보호자에게만 리뷰를 작성할 수 있습니다.' })
+    }
 
-  if (error) {
+    // 리뷰 저장
+    const reviewResult = await query(
+      `INSERT INTO reviews (job_id, reviewer_id, reviewee_id, rating, comment)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [jobId, userId, revieweeId, rating, comment || null]
+    )
+
+    // 리뷰어/리뷰이 정보 조회
+    const fullReviewResult = await query(
+      `SELECT
+        r.*,
+        json_build_object(
+          'id', reviewer.id,
+          'name', reviewer.name,
+          'avatar_url', reviewer.avatar_url,
+          'role', reviewer.role
+        ) as reviewer,
+        json_build_object(
+          'id', reviewee.id,
+          'name', reviewee.name,
+          'avatar_url', reviewee.avatar_url,
+          'role', reviewee.role
+        ) as reviewee
+       FROM reviews r
+       LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
+       LEFT JOIN users reviewee ON r.reviewee_id = reviewee.id
+       WHERE r.id = $1`,
+      [reviewResult.rows[0].id]
+    )
+
+    return res.status(201).json({ success: true, review: fullReviewResult.rows[0] })
+  } catch (error: any) {
     console.error('Review create error:', error)
+
+    // Unique constraint violation
+    if (error.code === '23505') {
+      return res.status(400).json({ error: '이미 리뷰를 작성하셨습니다.' })
+    }
+
     return res.status(500).json({ error: '리뷰 작성에 실패했습니다.' })
   }
-
-  return res.status(201).json({ success: true, review })
 }

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createServerClient } from '@/lib/supabase'
 import type { CaregiverProfile, User } from '@/types/database.types'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
@@ -242,50 +241,28 @@ function renderStars(rating: number): string {
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const { id } = context.params as { id: string }
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const supabase = createServerClient()
+  try {
+    // API 라우트를 통해 간병인 정보 조회
+    const response = await fetch(`${baseUrl}/api/caregivers/${id}`)
 
-  // 간병인 정보 조회
-  const { data: caregiver, error } = await supabase
-    .from('users')
-    .select(`
-      *,
-      caregiver_profile:caregiver_profiles(*)
-    `)
-    .eq('id', id)
-    .eq('role', 'caregiver')
-    .single()
+    if (!response.ok) {
+      return { notFound: true }
+    }
 
-  if (error || !caregiver) {
+    const data = await response.json()
+
+    return {
+      props: {
+        caregiver: data.caregiver,
+        reviews: data.reviews,
+        averageRating: data.averageRating,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching caregiver:', error)
     return { notFound: true }
-  }
-
-  // 리뷰 조회
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select(`
-      id,
-      rating,
-      comment,
-      created_at,
-      reviewer:users!reviewer_id(name)
-    `)
-    .eq('reviewee_id', id)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  // 평균 평점 계산
-  const averageRating =
-    reviews && reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0
-
-  return {
-    props: {
-      caregiver: caregiver as Props['caregiver'],
-      reviews: (reviews as Props['reviews']) || [],
-      averageRating: Math.round(averageRating * 10) / 10,
-    },
   }
 }
 

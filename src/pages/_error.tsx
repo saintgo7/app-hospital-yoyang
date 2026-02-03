@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { NextPage, GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { Layout } from '@/components/layout/Layout'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,7 @@ const ErrorPage: NextPage<ErrorProps> = ({ statusCode }) => {
   )
 }
 
+// Use getInitialProps for error pages (special case)
 ErrorPage.getInitialProps = ({ res, err }) => {
   const statusCode = res ? res.statusCode : err ? err.statusCode : 404
   return { statusCode }

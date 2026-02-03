@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>에러 분석 - CareMatch V3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <nav class="border-b bg-white sticky top-0">
+    <div class="container mx-auto px-4 py-4 flex justify-between">
+      <h1 class="text-2xl font-bold text-blue-600">CareMatch V3</h1>
+      <div class="flex space-x-4 text-sm">
+        <a href="index.html" class="text-gray-600 hover:text-gray-900">대시보드</a>
+        <a href="development-plan.html" class="text-gray-600">개발계획</a>
+        <a href="dev-logs.html" class="text-gray-600">개발로그</a>
+        <a href="errors.html" class="text-blue-600 font-semibold">에러분석</a>
+        <a href="deployment.html" class="text-gray-600">배포</a>
+        <a href="performance.html" class="text-gray-600">성능</a>
+        <a href="optimization.html" class="text-gray-600">최적화</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-4">에러 분석 및 해결 방안</h1>
+    <p class="text-lg text-gray-600 mb-8">발생한 빌드/런타임 에러와 해결 과정</p>
+
+    <div class="space-y-6">
+      <!-- 에러 1: NextRouter SSG 문제 -->
+      <div class="bg-white rounded-lg border p-6">
+        <div class="flex items-start gap-4 mb-4">
+          <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">빌드 에러</span>
+          <div class="flex-1">
+            <h3 class="text-xl font-bold mb-2">NextRouter was not mounted</h3>
+            <p class="text-gray-600 text-sm">Auth 페이지에서 useRouter() SSG 호환 문제</p>
+          </div>
+        </div>
+        <div class="bg-red-50 p-4 rounded mb-4">
+          <h4 class="font-semibold mb-2">에러 메시지:</h4>
+          <code class="block text-sm">Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted</code>
+        </div>
+        <div class="bg-green-50 p-4 rounded">
+          <h4 class="font-semibold mb-2 text-green-900">✓ 해결 방법:</h4>
+          <p class="text-sm mb-2">Auth 페이지에 getServerSideProps 추가하여 SSR로 전환</p>
+          <code class="block bg-gray-800 text-green-400 p-3 rounded text-sm">
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} }
+}
+          </code>
+        </div>
+      </div>
+
+      <!-- 에러 2: Html import 문제 -->
+      <div class="bg-white rounded-lg border p-6">
+        <div class="flex items-start gap-4 mb-4">
+          <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">빌드 에러</span>
+          <div class="flex-1">
+            <h3 class="text-xl font-bold mb-2">Html should not be imported outside _document</h3>
+            <p class="text-gray-600 text-sm">404 페이지 SSG 시 Html import 에러</p>
+          </div>
+        </div>
+        <div class="bg-red-50 p-4 rounded mb-4">
+          <h4 class="font-semibold mb-2">에러 메시지:</h4>
+          <code class="block text-sm">Error: <Html> should not be imported outside of pages/_document</code>
+        </div>
+        <div class="bg-green-50 p-4 rounded">
+          <h4 class="font-semibold mb-2 text-green-900">✓ 해결 방법:</h4>
+          <p class="text-sm mb-2">.next 캐시 삭제 및 NODE_ENV=production 명시적 설정</p>
+          <code class="block bg-gray-800 text-green-400 p-3 rounded text-sm">
+rm -rf .next && NODE_ENV=production pnpm build
+          </code>
+        </div>
+      </div>
+
+      <!-- 에러 3: 타입 에러 -->
+      <div class="bg-white rounded-lg border p-6">
+        <div class="flex items-start gap-4 mb-4">
+          <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">타입 에러</span>
+          <div class="flex-1">
+            <h3 class="text-xl font-bold mb-2">LRU Cache 타입 문제</h3>
+            <p class="text-gray-600 text-sm">Map.keys().next().value 타입이 string | undefined</p>
+          </div>
+        </div>
+        <div class="bg-yellow-50 p-4 rounded mb-4">
+          <h4 class="font-semibold mb-2">에러 메시지:</h4>
+          <code class="block text-sm">Type 'string | undefined' is not assignable to parameter of type 'string'</code>
+        </div>
+        <div class="bg-green-50 p-4 rounded">
+          <h4 class="font-semibold mb-2 text-green-900">✓ 해결 방법:</h4>
+          <p class="text-sm mb-2">undefined 체크 추가</p>
+          <code class="block bg-gray-800 text-green-400 p-3 rounded text-sm">
+const firstKey = this.cache.keys().next().value
+if (firstKey !== undefined) {
+  this.cache.delete(firstKey)
+}
+          </code>
+        </div>
+      </div>
+
+      <!-- 통계 -->
+      <div class="bg-gradient-to-br from-blue-50 to-green-50 border-2 border-green-500 rounded-lg p-6">
+        <h3 class="text-2xl font-bold mb-4 text-center">에러 해결 통계</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="text-center p-4 bg-white rounded shadow">
+            <div class="text-3xl font-bold text-green-600 mb-2">100%</div>
+            <div class="text-sm text-gray-600">해결률</div>
+          </div>
+          <div class="text-center p-4 bg-white rounded shadow">
+            <div class="text-3xl font-bold text-blue-600 mb-2">3개</div>
+            <div class="text-sm text-gray-600">총 에러 수</div>
+          </div>
+          <div class="text-center p-4 bg-white rounded shadow">
+            <div class="text-3xl font-bold text-purple-600 mb-2">0개</div>
+            <div class="text-sm text-gray-600">미해결</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t mt-16 py-8 bg-white">
+    <div class="container mx-auto px-4 text-center text-sm text-gray-600">
+      <p>CareMatch V3 - 에러 분석 | Generated by Claude Code on 2026-01-19</p>
+    </div>
+  </footer>
+</body>
+</html>

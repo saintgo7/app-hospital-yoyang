@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query, transaction } from '@/lib/db'
 
 interface CompleteProfileBody {
   email: string
@@ -42,59 +42,58 @@ export default async function handler(
   }
 
   try {
-    const supabase = createServerClient()
+    // 트랜잭션으로 사용자 생성 및 간병인 프로필 생성
+    const result = await transaction(async (client) => {
+      // 사용자 생성
+      const userResult = await client.query<{
+        id: string
+        email: string
+        name: string
+        role: string
+      }>(
+        `INSERT INTO users (email, name, phone, role, avatar_url, email_verified)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         RETURNING id, email, name, role`,
+        [
+          session.user.email,
+          body.name.trim(),
+          body.phone.replace(/-/g, ''),
+          body.role,
+          body.avatarUrl || null,
+        ]
+      )
 
-    // 사용자 생성
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .insert({
-        email: session.user.email,
-        name: body.name.trim(),
-        phone: body.phone.replace(/-/g, ''),
-        role: body.role,
-        avatar_url: body.avatarUrl || null,
-      })
-      .select()
-      .single()
+      const user = userResult.rows[0]
 
-    if (userError) {
-      console.error('User creation error:', userError)
-
-      if (userError.code === '23505') {
-        return res.status(400).json({ error: '이미 가입된 이메일입니다.' })
+      // 간병인인 경우 프로필 생성
+      if (body.role === 'caregiver') {
+        await client.query(
+          `INSERT INTO caregiver_profiles (user_id, introduction, is_available)
+           VALUES ($1, $2, $3)`,
+          [user.id, body.introduction || null, true]
+        )
       }
-      throw userError
-    }
 
-    // 간병인인 경우 프로필 생성
-    if (body.role === 'caregiver') {
-      const { error: profileError } = await supabase
-        .from('caregiver_profiles')
-        .insert({
-          user_id: user.id,
-          introduction: body.introduction || null,
-          is_available: true,
-        })
-
-      if (profileError) {
-        console.error('Caregiver profile creation error:', profileError)
-        // 롤백을 위해 사용자 삭제
-        await supabase.from('users').delete().eq('id', user.id)
-        throw profileError
-      }
-    }
+      return user
+    })
 
     return res.status(200).json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        id: result.id,
+        email: result.email,
+        name: result.name,
+        role: result.role,
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Complete profile error:', error)
+
+    // PostgreSQL unique constraint violation
+    if (error.code === '23505') {
+      return res.status(400).json({ error: '이미 가입된 이메일입니다.' })
+    }
+
     return res.status(500).json({ error: '프로필 저장 중 오류가 발생했습니다.' })
   }
 }

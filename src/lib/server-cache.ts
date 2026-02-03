@@ -1,6 +1,14 @@
 /**
- * Server-side caching utilities
- * Following Vercel best practices: server-cache-react, server-cache-lru
+ * @deprecated This file is deprecated and no longer used.
+ *
+ * The project has migrated from Supabase to PostgreSQL with NextAuth.
+ *
+ * - Server-side data fetching: Use API routes instead
+ * - Caching: Use Next.js built-in caching mechanisms (revalidate, ISR)
+ *
+ * Migration date: 2026-02-03
+ *
+ * DO NOT USE THIS FILE IN NEW CODE.
  */
 
 import { cache } from 'react'

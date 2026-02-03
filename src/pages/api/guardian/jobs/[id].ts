@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -38,29 +38,56 @@ async function handleGet(
   jobId: string,
   userId: string
 ) {
-  const supabase = createServerClient()
+  try {
+    // 구인글과 지원자 정보 조회
+    const jobResult = await query(
+      `SELECT j.* FROM job_postings j
+       WHERE j.id = $1 AND j.guardian_id = $2`,
+      [jobId, userId]
+    )
 
-  const { data: job, error } = await supabase
-    .from('job_postings')
-    .select(`
-      *,
-      applications(
-        *,
-        caregiver:users!caregiver_id(
-          *,
-          caregiver_profile:caregiver_profiles(*)
-        )
-      )
-    `)
-    .eq('id', jobId)
-    .eq('guardian_id', userId)
-    .single()
+    if (jobResult.rows.length === 0) {
+      return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
+    }
 
-  if (error || !job) {
-    return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
+    // 지원자 목록 조회
+    const applicationsResult = await query(
+      `SELECT
+        a.*,
+        json_build_object(
+          'id', u.id,
+          'name', u.name,
+          'avatar_url', u.avatar_url,
+          'caregiver_profile', (
+            SELECT json_build_object(
+              'id', cp.id,
+              'experience_years', cp.experience_years,
+              'certifications', cp.certifications,
+              'specializations', cp.specializations,
+              'introduction', cp.introduction,
+              'hourly_rate', cp.hourly_rate,
+              'is_available', cp.is_available,
+              'location', cp.location
+            )
+            FROM caregiver_profiles cp
+            WHERE cp.user_id = u.id
+          )
+        ) as caregiver
+       FROM applications a
+       LEFT JOIN users u ON a.caregiver_id = u.id
+       WHERE a.job_id = $1
+       ORDER BY a.created_at DESC`,
+      [jobId]
+    )
+
+    const job = jobResult.rows[0]
+    job.applications = applicationsResult.rows
+
+    return res.status(200).json({ job })
+  } catch (error) {
+    console.error('Job fetch error:', error)
+    return res.status(500).json({ error: '구인글을 불러오는데 실패했습니다.' })
   }
-
-  return res.status(200).json({ job })
 }
 
 async function handlePatch(
@@ -69,50 +96,89 @@ async function handlePatch(
   jobId: string,
   userId: string
 ) {
-  const { status, title, description, location, careType, startDate, endDate, hourlyRate, patientInfo } = req.body
-  const supabase = createServerClient()
+  const {
+    status,
+    title,
+    description,
+    location,
+    careType,
+    startDate,
+    endDate,
+    hourlyRate,
+    patientInfo,
+  } = req.body
 
-  // 권한 확인
-  const { data: existingJob } = await supabase
-    .from('job_postings')
-    .select('id')
-    .eq('id', jobId)
-    .eq('guardian_id', userId)
-    .single()
+  try {
+    // 권한 확인
+    const existingResult = await query(
+      'SELECT id FROM job_postings WHERE id = $1 AND guardian_id = $2',
+      [jobId, userId]
+    )
 
-  if (!existingJob) {
-    return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
-  }
+    if (existingResult.rows.length === 0) {
+      return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
+    }
 
-  type JobStatus = 'open' | 'closed' | 'in_progress' | 'completed'
+    // 동적 업데이트 쿼리 생성
+    const updates: string[] = []
+    const values: any[] = []
+    let paramIndex = 1
 
-  const updateData: Record<string, unknown> = {}
+    if (status && ['open', 'closed', 'in_progress', 'completed'].includes(status)) {
+      updates.push(`status = $${paramIndex++}`)
+      values.push(status)
+    }
+    if (title) {
+      updates.push(`title = $${paramIndex++}`)
+      values.push(title)
+    }
+    if (description) {
+      updates.push(`description = $${paramIndex++}`)
+      values.push(description)
+    }
+    if (location) {
+      updates.push(`location = $${paramIndex++}`)
+      values.push(location)
+    }
+    if (careType) {
+      updates.push(`care_type = $${paramIndex++}`)
+      values.push(careType)
+    }
+    if (startDate) {
+      updates.push(`start_date = $${paramIndex++}`)
+      values.push(startDate)
+    }
+    if (endDate !== undefined) {
+      updates.push(`end_date = $${paramIndex++}`)
+      values.push(endDate)
+    }
+    if (hourlyRate) {
+      updates.push(`hourly_rate = $${paramIndex++}`)
+      values.push(hourlyRate)
+    }
+    if (patientInfo) {
+      updates.push(`patient_info = $${paramIndex++}`)
+      values.push(JSON.stringify(patientInfo))
+    }
 
-  if (status && ['open', 'closed', 'in_progress', 'completed'].includes(status)) {
-    updateData.status = status as JobStatus
-  }
-  if (title) updateData.title = title
-  if (description) updateData.description = description
-  if (location) updateData.location = location
-  if (careType) updateData.care_type = careType
-  if (startDate) updateData.start_date = startDate
-  if (endDate !== undefined) updateData.end_date = endDate
-  if (hourlyRate) updateData.hourly_rate = hourlyRate
-  if (patientInfo) updateData.patient_info = patientInfo
+    if (updates.length === 0) {
+      return res.status(400).json({ error: '업데이트할 내용이 없습니다.' })
+    }
 
-  const { data: job, error } = await supabase
-    .from('job_postings')
-    .update(updateData)
-    .eq('id', jobId)
-    .select()
-    .single()
+    values.push(jobId)
+    const result = await query(
+      `UPDATE job_postings
+       SET ${updates.join(', ')}
+       WHERE id = $${paramIndex}
+       RETURNING *`,
+      values
+    )
 
-  if (error) {
+    return res.status(200).json({ success: true, job: result.rows[0] })
+  } catch (error) {
     console.error('Job update error:', error)
     return res.status(500).json({ error: '구인글 수정에 실패했습니다.' })
   }
-
-  return res.status(200).json({ success: true, job })
 }
 
 async function handleDelete(
@@ -121,34 +187,30 @@ async function handleDelete(
   jobId: string,
   userId: string
 ) {
-  const supabase = createServerClient()
+  try {
+    // 권한 확인 및 상태 확인
+    const jobResult = await query<{ id: string; status: string }>(
+      'SELECT id, status FROM job_postings WHERE id = $1 AND guardian_id = $2',
+      [jobId, userId]
+    )
 
-  // 권한 확인
-  const { data: existingJob } = await supabase
-    .from('job_postings')
-    .select('id, status')
-    .eq('id', jobId)
-    .eq('guardian_id', userId)
-    .single()
+    if (jobResult.rows.length === 0) {
+      return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
+    }
 
-  if (!existingJob) {
-    return res.status(404).json({ error: '구인글을 찾을 수 없습니다.' })
-  }
+    const job = jobResult.rows[0]
 
-  // 진행 중인 구인글은 삭제 불가
-  if (existingJob.status === 'in_progress') {
-    return res.status(400).json({ error: '진행 중인 구인글은 삭제할 수 없습니다.' })
-  }
+    // 진행 중인 구인글은 삭제 불가
+    if (job.status === 'in_progress') {
+      return res.status(400).json({ error: '진행 중인 구인글은 삭제할 수 없습니다.' })
+    }
 
-  const { error } = await supabase
-    .from('job_postings')
-    .delete()
-    .eq('id', jobId)
+    // 삭제
+    await query('DELETE FROM job_postings WHERE id = $1', [jobId])
 
-  if (error) {
+    return res.status(200).json({ success: true })
+  } catch (error) {
     console.error('Job delete error:', error)
     return res.status(500).json({ error: '구인글 삭제에 실패했습니다.' })
   }
-
-  return res.status(200).json({ success: true })
 }

@@ -6,7 +6,6 @@ import { Layout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createServerClient } from '@/lib/supabase'
 import type { JobPosting, Application } from '@/types/database.types'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
@@ -247,73 +246,37 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     }
   }
 
-  const supabase = createServerClient()
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  // 사용자 정보
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, name, email')
-    .eq('email', session.user.email)
-    .single()
+  try {
+    // API 라우트를 통해 대시보드 데이터 조회
+    const response = await fetch(`${baseUrl}/api/guardian/dashboard`, {
+      headers: {
+        cookie: context.req.headers.cookie || '',
+      },
+    })
 
-  if (!user) {
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard data')
+    }
+
+    const data = await response.json()
+
+    return {
+      props: {
+        user: data.user,
+        jobs: data.jobs,
+        stats: data.stats,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching dashboard:', error)
     return {
       redirect: {
-        destination: '/auth/complete-profile',
+        destination: '/auth/login',
         permanent: false,
       },
     }
-  }
-
-  // 구인글 (최근 5개)
-  const { data: jobs } = await supabase
-    .from('job_postings')
-    .select(`
-      *,
-      applications(*)
-    `)
-    .eq('guardian_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // 통계
-  const { count: totalJobs } = await supabase
-    .from('job_postings')
-    .select('*', { count: 'exact', head: true })
-    .eq('guardian_id', user.id)
-
-  const { count: openJobs } = await supabase
-    .from('job_postings')
-    .select('*', { count: 'exact', head: true })
-    .eq('guardian_id', user.id)
-    .eq('status', 'open')
-
-  // 받은 지원 수
-  const { data: allJobs } = await supabase
-    .from('job_postings')
-    .select('id')
-    .eq('guardian_id', user.id)
-
-  let totalApplications = 0
-  if (allJobs && allJobs.length > 0) {
-    const jobIds = allJobs.map((j) => j.id)
-    const { count } = await supabase
-      .from('applications')
-      .select('*', { count: 'exact', head: true })
-      .in('job_id', jobIds)
-    totalApplications = count || 0
-  }
-
-  return {
-    props: {
-      user,
-      jobs: (jobs as JobWithApplications[]) || [],
-      stats: {
-        totalJobs: totalJobs || 0,
-        openJobs: openJobs || 0,
-        totalApplications,
-      },
-    },
   }
 }
 

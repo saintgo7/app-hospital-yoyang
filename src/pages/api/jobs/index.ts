@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
-import { createServerClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,38 +31,52 @@ export default async function handler(
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   const { location, careType, status = 'open' } = req.query
-  const supabase = createServerClient()
 
   type JobStatus = 'open' | 'closed' | 'in_progress' | 'completed'
   const validStatus = ['open', 'closed', 'in_progress', 'completed'].includes(status as string)
     ? (status as JobStatus)
     : 'open'
 
-  let query = supabase
-    .from('job_postings')
-    .select(`
-      *,
-      guardian:users!guardian_id(id, name, avatar_url)
-    `)
-    .eq('status', validStatus)
-    .order('created_at', { ascending: false })
+  try {
+    // SQL 쿼리 조건 동적 생성
+    const conditions: string[] = ['j.status = $1']
+    const params: any[] = [validStatus]
+    let paramIndex = 2
 
-  if (location) {
-    query = query.ilike('location', `%${location}%`)
-  }
+    if (location) {
+      conditions.push(`j.location ILIKE $${paramIndex}`)
+      params.push(`%${location}%`)
+      paramIndex++
+    }
 
-  if (careType) {
-    query = query.eq('care_type', careType as string)
-  }
+    if (careType) {
+      conditions.push(`j.care_type = $${paramIndex}`)
+      params.push(careType as string)
+      paramIndex++
+    }
 
-  const { data: jobs, error } = await query
+    const whereClause = conditions.join(' AND ')
 
-  if (error) {
+    const result = await query(
+      `SELECT
+        j.*,
+        json_build_object(
+          'id', u.id,
+          'name', u.name,
+          'avatar_url', u.avatar_url
+        ) as guardian
+       FROM job_postings j
+       LEFT JOIN users u ON j.guardian_id = u.id
+       WHERE ${whereClause}
+       ORDER BY j.created_at DESC`,
+      params
+    )
+
+    return res.status(200).json({ jobs: result.rows })
+  } catch (error) {
     console.error('Jobs fetch error:', error)
     return res.status(500).json({ error: '구인글을 불러오는데 실패했습니다.' })
   }
-
-  return res.status(200).json({ jobs })
 }
 
 async function handlePost(
@@ -102,29 +116,32 @@ async function handlePost(
     return res.status(400).json({ error: '시급은 최저시급(9,860원) 이상이어야 합니다.' })
   }
 
-  const supabase = createServerClient()
+  try {
+    const result = await query(
+      `INSERT INTO job_postings (
+        guardian_id, title, description, location,
+        care_type, start_date, end_date, hourly_rate,
+        patient_info, status
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *`,
+      [
+        userId,
+        title.trim(),
+        description.trim(),
+        location.trim(),
+        careType,
+        startDate,
+        endDate || null,
+        hourlyRate,
+        JSON.stringify(patientInfo || {}),
+        'open',
+      ]
+    )
 
-  const { data: job, error } = await supabase
-    .from('job_postings')
-    .insert({
-      guardian_id: userId,
-      title: title.trim(),
-      description: description.trim(),
-      location: location.trim(),
-      care_type: careType,
-      start_date: startDate,
-      end_date: endDate || null,
-      hourly_rate: hourlyRate,
-      patient_info: patientInfo || {},
-      status: 'open',
-    })
-    .select()
-    .single()
-
-  if (error) {
+    return res.status(201).json({ success: true, job: result.rows[0] })
+  } catch (error) {
     console.error('Job creation error:', error)
     return res.status(500).json({ error: '구인글 등록에 실패했습니다.' })
   }
-
-  return res.status(201).json({ success: true, job })
 }
